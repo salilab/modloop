@@ -1,0 +1,67 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.77 [en] (X11; U; Linux 2.4.3-12 i686) [Netscape]">
+   <title>ModLoop: Help/Glossary</title>
+</head>
+<body bgcolor="#FFFFFF">
+
+
+<center>
+<h2>
+<b><u><font face="Arial,Helvetica"><font size=+4>Help</font></font></u></b></h2></center>
+
+<blockquote>
+<ul> 
+<li>
+<a NAME="file"></a><b>Upload your file</b></li>
+
+<br>The uploaded coordinate file must be in PDB format. The loop region to be modelled must be included in the coordinate file, even if only with dummy coordinates because topological connections are derived from the PDB file (there is no other input required.)
+
+<br>&nbsp;
+<li>
+<a NAME="loop"></a><b>Select loop segment</b></li>
+
+<br>The starting and ending residue positions and chain identifiers (if any) should be specified here, separated by ":". One can specify several loop segments, but the total number of residues involved in the loops must not exceed 14. Please use the following syntax:<br><br>
+Example 1. one loop between residues 12 and 18 in chain B:
+<br><br>
+<h2>12:B:18:B:</h2>
+
+Example 2.  one loop between residues 15 and 22, no chain identifier,  another loop between residues 98 and 103 in chain B and one more residue, at  position 66 in chain C to be selected:
+<br><br>
+<h2>15::22::<br>
+98:B:103:B:<br>
+66:C:66:C:<br>
+</h2>
+
+<br><b></b>&nbsp;
+
+<li>
+<a NAME="name"></a><b>Name of the model</b></li>
+
+<br>The model name entered here is used as a reference name for the protein model with the optimized loop.
+<br><b></b>&nbsp;
+
+<li>
+<a NAME="e-mail"></a><b>E-mail address</b></li>
+
+<br>The e-mail address that is entered here is used by ModLoop to send the resulting coordinate file (with the
+optimzed loop included) 
+<br>&nbsp;
+
+<li>
+<a NAME="modkey"></a><b>MODELLER key</b></li>
+
+<br>This server is freely available for academic users. The loop modeling module is implemented in program 
+MODELLER therefore  you need to register for a valid license of MODELLER. It can be done on-line and
+automatically by accessing the web site: <a href="http://salilab.org/modeller/registration.shtml">http://salilab.org/modeller/registration.shtml</a>. The
+server will return a MODELLER KEY password. You need to enter this passwd here in order to use this server.
+<br>&nbsp;
+
+
+</ul>
+</blockquote>
+
+</body>
+</html>

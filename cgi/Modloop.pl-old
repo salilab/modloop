@@ -1,0 +1,312 @@
+#!/usr/bin/perl -w
+
+###############################################################
+#                                                             #
+# on-line loop modeling script, including parallel processing #
+# with codine system                                          #
+# copyright Andras Fiser, March 22, 2002,                     #
+# andras@viol.rockefeller.edu                                 #
+# Rockefeller University, New York, NY 10021                  #
+#                                                             #
+###############################################################
+
+use Cwd;
+use CGI qw/:standard /;
+$tmp="/pipe1/andras/html/tmploop/";
+
+################################
+###some defaults
+
+ $user_pdb="";               # pdb coordinates
+ $user_pdb_name="";          # uploaded pdb file name
+ $start_res="-999";          # strarting residue number
+ $start_id="";               # starting chain ID
+ $end_res="-899";            # ending residue number
+ $end_id="";                 # ending chain ID
+ $iteration=50;              # number of loop models
+ $user_name="loop";          # root name for loop models
+
+################################
+### get parameters from html
+ $user_pdb      = param('user_pdb1');        # pasted coordinates
+ $user_pdb_name = param('user_pdb2');        # uploaded file name
+ $start_res     = param('start_res')||-999;
+ $start_id      = param('start_id');
+ $end_res       = param('end_res')||-899;     # ending residue number
+ $end_id        = param('end_id');            # ending chain ID
+ $iteration     = param('iteration')||50;     # number of models
+ $user_name     = param('user_name');         # root name
+ $email         = param('email');             # users e-mail
+ $modkey        = param('modkey');            # passwd 
+
+#@input=  split( /\n/, $user_pdb );
+#open (TMP, ">$tmp/andras");
+#foreach $line (@input)
+#{
+#  print TMP $line,"\n";
+#}
+#close TMP;
+#  exit (0);
+
+#print header(), start_html("MODLOOP ERROR"),
+#         h4({-align=>'CENTER'},font({-color=>"#AA0000"},"<pre>",">>$user_pdb<<")),
+#         end_html(); exit;
+#exit;
+
+################################
+###check and fix iteration param
+if (($iteration < 1) || ($iteration > 200) || ($iteration == 0)) {$iteration=50};
+
+
+################################
+# check for passwd
+if ($modkey =~ /***REMOVED***/)
+  { $ok=1;}
+else {
+         print header(), start_html("MODLOOP ERROR"),
+         h2({-align=>'CENTER'},font({-color=>"#AA0000"},"ERROR!")),
+       hr,
+         h4({-align=>'CENTER'},font({-color=>"#AA0000"},"You have entered an invalid MODELLER KEY!")),
+         h4({-align=>'CENTER'},font({-color=>"#AA0000"},"Try again!")),
+         end_html(); exit;       
+     }
+
+
+
+################################
+# both upload and szoveg is submitted
+if (($user_pdb ne "") && ($user_pdb_name  ne ""))
+  {
+         print header(), start_html("MODLOOP ERROR"),
+         h2({-align=>'CENTER'},font({-color=>"#AA0000"},"ERROR!")),
+       hr,
+         h4({-align=>'CENTER'},font({-color=>"#AA0000"},"There are both pasted and uploaded sequences!")),
+         h4({-align=>'CENTER'},font({-color=>"#AA0000"},"Submit only one of them! Try again!")),
+         end_html(); exit;       
+     }
+
+#################################
+###if all empty
+
+if (($user_pdb eq "") && ($user_pdb_name eq ""))
+  {
+         print header(), start_html("MODLOOP ERROR"),
+         h2({-align=>'CENTER'},font({-color=>"#AA0000"},"ERROR!")),
+       hr,
+         h4({-align=>'CENTER'},font({-color=>"#AA0000"},"Nothing has been  submitted! Try again!")),
+         end_html(); exit;
+     }
+
+################################
+# too long loops rejected
+if ((($end_res-$start_res) > 14) || ($start_id ne $end_id) || (($end_res-$start_res)<1) || ($start_res eq "") || ($end_res eq ""))
+  {
+         print header(), start_html("MODLOOP ERROR"),
+         h2({-align=>'CENTER'},font({-color=>"#AA0000"},"ERROR!")),
+       hr,
+         h4({-align=>'CENTER'},font({-color=>"#AA0000"},"The loop selected is too long (>14), or shorter than 1 residue or not selected ! ")),
+         h4({-align=>'CENTER'},font({-color=>"#AA0000"},"Please correct! Try again!")),
+         end_html(); exit;       
+     }
+
+#################################
+###if email empty
+
+if ($email eq "")
+  {
+         print header(), start_html("MODLOOP ERROR"),
+         h2({-align=>'CENTER'},font({-color=>"#AA0000"},"ERROR!")),
+       hr,
+         h4({-align=>'CENTER'},font({-color=>"#AA0000"},"Please provide an e-mail address, because results will be sent by e-mail!")),
+         end_html(); exit;
+     }
+
+##################################
+### if there are too many users
+$number_of_users=7;
+
+$pid=`ls -1  $tmp/modloop_* |wc | awk '{print \$2}'`;
+
+if ($pid > $number_of_users )
+{
+         print header(), start_html("MODLOOP"),
+         h2({-align=>'CENTER'},font({-color=>"#AA0000"},"WARNING!")),
+       hr,
+         h4({-align=>'CENTER'},font({-color=>"#AA0000"},"The server queu has reached its maximum number of $number_of_users  simultaneous users. Please try later on!"
+)),
+         h4({-align=>'CENTER'},font({-color=>"#AA0000"},"Sorry!")),
+         end_html(); exit;    
+}
+
+###################################
+###read coordinates from file, replace if needed the pdb_user
+$szoveg="";
+
+if ($user_pdb_name ne "") 
+   {
+         while (<$user_pdb_name>) 
+          {    
+	      $szoveg = $szoveg.$_;
+          }
+    $user_pdb=$szoveg;
+     }
+
+##################################
+### generate a unique memo file for each submission
+srand;
+$bemenet = time()."_AF_".int(rand(1)*100000);
+
+@utasitas=sprintf ("touch $tmp/modloop_$bemenet;chmod uog+rwx $tmp/modloop_$bemenet; echo $email $user_name $runname $bemenet $iteration > $tmp/modloop_$bemenet");
+system(@utasitas);
+
+@utasitas=sprintf ("chmod uog+rwx $tmp/modloop_$bemenet");
+system(@utasitas);
+
+##################################
+#####send a mail each time someone is using it
+open(OUTMAIL,">$tmp/mail.txt");
+print OUTMAIL "pofa e-mail:",$email,"<\n";
+print OUTMAIL "feherje code: ",$user_name,"<\n";
+print OUTMAIL "loop: ",$start_res,$start_id,"-",$end_res,$end_id,"<\n";
+print OUTMAIL "id: ",$bemenet,"<\n";
+close (OUTMAIL);
+@utasitas=sprintf ("/bin/mail andras\@guitar < $tmp/mail.txt\n");
+system(@utasitas);
+system("rm /$tmp/mail.txt");
+
+####################################
+### create a run directory
+#$cwd = cwd();
+$runname = "do_modloop_" . $bemenet;
+system("mkdir -p $tmp/$runname");
+
+@utasitas=sprintf ("chmod uog+rwx $tmp/$runname/");
+system(@utasitas);
+
+###################################
+###write pdb output
+open(OUT,">$tmp/$runname/pdb-$bemenet.pdb");
+print OUT $user_pdb;
+close(OUT);
+
+@utasitas=sprintf ("chmod uog+rwx $tmp/$runname/pdb-$bemenet.pdb");
+system(@utasitas);
+
+
+#################################
+### generate top file 
+  $oldconfig="looptmp.top";
+  $newconf = "$tmp/$runname/loop-$bemenet.top";
+  open(NEWCONF,">$newconf");
+  open(OLDCONF,$oldconfig);
+  while( $line =  <OLDCONF> ) {
+    $line =~ s/USR_NAME/$user_name/g;
+    $line =~ s/USER_PDB/pdb-$bemenet.pdb/g;
+    $line =~ s/START_RES/$start_res/g;
+    $line =~ s/START_ID/$start_id/g;
+    $line =~ s/END_RES/$end_res/g;
+    $line =~ s/END_ID/$end_id/g;
+
+    print NEWCONF $line;
+}
+  close(OLDCONF);
+  close(NEWCONF);
+
+#################################
+# generate  codine script
+  $oldcodine="codinetmp.sh";
+  $newcodine = "codine-$bemenet.sh";
+  open(NEWCONF,">$tmp/$runname/$newcodine");
+  open(OLDCONF,$oldcodine);
+  while( $line =  <OLDCONF> ) 
+    {
+     $line =~ s/iteration/$iteration/g;
+     print NEWCONF $line;
+    }
+  close(OLDCONF);
+  close(NEWCONF);
+
+#################################
+# generate  pdb header
+  $oldtext="toptext.tex";
+  open(NEWCONF,">$tmp/$runname/toptext.tex");
+  open(OLDCONF,$oldtext);
+  while( $line =  <OLDCONF> ) 
+    {
+    $line =~ s/USR_NAME/$user_name/g;
+    $line =~ s/USER_PDB/pdb-$bemenet.pdb/g;
+    $line =~ s/START_RES/$start_res/g;
+    $line =~ s/START_ID/$start_id/g;
+    $line =~ s/END_RES/$end_res/g;
+    $line =~ s/END_ID/$end_id/g;
+     $line =~ s/iteration/$iteration/g;
+     print NEWCONF $line;
+    }
+  close(OLDCONF);
+  close(NEWCONF);
+
+####################################
+### copy/generate  pdb/top/sh files in $tmp directory
+#system("cp  $tmp/pdb-$bemenet.pdb $cwd/$runname/");
+# already there
+
+$topfile="";
+for ($i=1;$i<=$iteration;$i++)
+{
+    #get a random number here
+    srand;
+    $random_seed=int(rand(1)*48000);$random_seed=$random_seed-49000;
+
+    system("sed \"s;CODINE_RND;$random_seed;\" $tmp/$runname/loop-$bemenet.top > $tmp/$runname/ide; mv $tmp/$runname/ide $tmp/$runname/$i-loop-$bemenet.top");
+    $topfile=$topfile." $i-loop-$bemenet.top";  # collect names for codine
+    system("sed \"s;item;$i;\" $tmp/$runname/$i-loop-$bemenet.top >  $tmp/$runname/ide; mv $tmp/$runname/ide $tmp/$runname/$i-loop-$bemenet.top");
+}
+
+###fix codine with job inputs
+system("sed \"s;TOPFILES;$topfile;\"  $tmp/$runname/codine-$bemenet.sh > $tmp/$runname/ide; mv $tmp/$runname/ide  $tmp/$runname/codine-$bemenet.sh");
+system("sed \"s;DIR;$runname;\"  $tmp/$runname/codine-$bemenet.sh > $tmp/$runname/ide; mv $tmp/$runname/ide  $tmp/$runname/codine-$bemenet.sh");
+
+###############################################
+## write subject details into a file and pop up an exit page
+
+### write details
+#@utasitas=sprintf("/usr/bin/perl Modloop_sub.pl $email $user_name $runname $bemenet $iteration  ");
+#@utasitas=sprintf ("/bin/mail andras\@guitar < $tmp/../cysredox.html &");
+#print header;print start_html; print @utasitas,br;
+#system("@utasitas >/dev/null 2>/dev/null &");
+#system (" /usr/bin/perl Modloop_sub.pl $email $user_name $runname $bemenet $iteration >/dev/null  &");
+
+
+### good bye
+
+print header(), start_html("MODLOOP SUBMITTED"),
+         h2({-align=>'CENTER'},font({-color=>"#AA0000"},"Dear User")),
+       hr,
+         h4({-align=>'CENTER'},font({-color=>"#AA0000"},"Your job has been submitted to the server,!")),
+         h4({-align=>'LEFT'},font({-color=>"#AA0000"},"Loop between $start_res:$start_id ....  $end_res:$end_id in protein >$user_name< ")),
+         h4({-align=>'LEFT'},font({-color=>"#AA0000"},"will be optimized with the method of Fiser et al. (Prot. Sci. (2000) 9,1753-1773")),
+         h4({-align=>'LEFT'},font({-color=>"#AA0000"},"Your process ID is $bemenet")),
+         h4({-align=>'LEFT'},font({-color=>"#AA0000"},"You will receive the protein coordinate file with the optimized loop region by e-mail, to the adress: $email")),
+        h4({-align=>'LEFT'},font({-color=>"#AA0000"},"The estimated execution time is ~90 min, depending on the load..")),
+        h4({-align=>'LEFT'},font({-color=>"#AA0000"},"If you experience a problem or you do not receive the result for more than  12 hours, please contact fisera\@rockefeller.edu")),
+h4({-align=>'CENTER'},font({-color=>"#AA0000"},"Thank you for using our server and good luck in your research!")),
+	hr,
+         end_html(); exit;  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
