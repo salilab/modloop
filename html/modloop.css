@@ -12,6 +12,15 @@ body.help {
   font-size:medium;
 }
 
+td.top {
+  vertical-align: top;
+  text-align: center;
+}
+
+img.pdf {
+  border-style: none;
+}
+
 a.help {
   color:#800000;
 }
