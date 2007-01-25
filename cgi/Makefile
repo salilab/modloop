@@ -1,6 +1,7 @@
 include ../Makefile.include
-DISTFILES=Modloop.pl
 
 install:
 	mkdir -p ${CGI}
-	cp ${DISTFILES} ${CGI}
+	sed -e 's#@RUNDIR@#${RUNDIR}#' < Modloop.pl > ${CGI}/Modloop.pl
+	chmod 755 ${CGI}/Modloop.pl
+	cp codinetmp.sh looptmp.top toptext.tex ${CGI}

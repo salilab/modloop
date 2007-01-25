@@ -14,7 +14,8 @@ use Cwd;
 use CGI qw/:standard /;
 use strict;
 
-my $tmp="/diva2/home/andras/html/tmploop/";
+# Substituted in at install time by Makefile:
+my $tmp="@RUNDIR@";
 
 ################################
 ###some defaults
@@ -23,12 +24,12 @@ my $number_of_users=10;         #simultaneous users
 ################################
 ### get parameters from html
 
-my $user_pdb_name = param('user_pdb2');         # uploaded file name
-my $iteration     = param('iteration')||300;     # number of models
-my $user_name     = param('user_name');         # root name
+my $user_pdb_name = param('user_pdb2')||"";     # uploaded file name
+my $iteration     = param('iteration')||300;    # number of models
+my $user_name     = param('user_name')||"";     # root name
 my $email         = param('email');             # users e-mail
-my $modkey        = param('modkey');            # passwd 
-my $szoveg        = param('text');              # selected loops
+my $modkey        = param('modkey')||"";        # passwd 
+my $szoveg        = param('text')||"";          # selected loops
 
 ################################
 ###check and fix iteration param
@@ -54,31 +55,33 @@ $szoveg =~ s/\s+//g;       # remove spaces
 
 my @loop_data=split (/:/,$szoveg);
 
-my $i=0;
 my $total_res=0;
 my (@start_res, @start_id, @end_res, @end_id);
-while ($loop_data[$i*4] ne "")
-  {
-    $start_res[$i]=$loop_data[$i*4];
-    $start_id[$i]=$loop_data[$i*4+1];
-    $end_res[$i]=$loop_data[$i*4+2];
-    $end_id[$i]=$loop_data[$i*4+3];
-    $total_res=$total_res+($end_res[$i]-$start_res[$i]); #all the selected residues
-    
+my $loops;
+for ($loops = 0; $loops*4+3 <= $#loop_data and $loop_data[$loops*4] ne "";
+     $loops++) {
+    $start_res[$loops]=$loop_data[$loops*4];
+    $start_id[$loops]=$loop_data[$loops*4+1];
+    $end_res[$loops]=$loop_data[$loops*4+2];
+    $end_id[$loops]=$loop_data[$loops*4+3];
+    $total_res=$total_res+($end_res[$loops]-$start_res[$loops]); #all the selected residues
+
     ################################
     # too long loops rejected
-    if ((($end_res[$i]-$start_res[$i]) > 20) || ($start_id[$i] ne $end_id[$i]) || (($end_res[$i]-$start_res[$i])<0) || ($start_res[$i] eq "") || ($end_res[$i] eq ""))
+    if ((($end_res[$loops]-$start_res[$loops]) > 20)
+        || ($start_id[$loops] ne $end_id[$loops])
+        || (($end_res[$loops]-$start_res[$loops])<0)
+        || ($start_res[$loops] eq "")
+        || ($end_res[$loops] eq ""))
       {
        print header(), start_html("MODLOOP ERROR"),
        h2({-align=>'CENTER'},font({-color=>"#AA0000"},"ERROR!")),
        hr,
        h4({-align=>'CENTER'},font({-color=>"#AA0000"},"The loop selected is too long (>20 residues) or shorter than 1 residue or not selected properly (syntax problem?)")),
-       h4({-align=>'CENTER'},font({-color=>"#AA0000"},"starting position $start_res[$i]:$start_id[$i], ending position: $end_res[$i]:$end_id[$i]")),
+       h4({-align=>'CENTER'},font({-color=>"#AA0000"},"starting position $start_res[$loops]:$start_id[$loops], ending position: $end_res[$loops]:$end_id[$loops]")),
        h4({-align=>'CENTER'},font({-color=>"#AA0000"},"Please correct! Try again!")),
        end_html(); exit;       
      }
-    ######################
-    $i++; # next loop
   }
 
 
@@ -112,10 +115,11 @@ my $user_pdb = "";
 
 if ($user_pdb_name && ($user_pdb_name ne "")) 
    {
-         while (<$user_pdb_name>) 
-          {    
-	      $szoveg = $szoveg.$_;
-          }
+     open(FILE, "$user_pdb_name") or die "Cannot open $user_pdb_name: $!";
+     while (<FILE>)  {
+       $szoveg .= $_;
+     }
+     close FILE;
     $user_pdb=$szoveg;
      }
 
@@ -145,9 +149,7 @@ print OUTMAIL "loops: >",@loop_data,"<\n";
 print OUTMAIL "job id: >",$bemenet,"<\n";
 print OUTMAIL "\n\n...adios...\n";
 close (OUTMAIL);
-@utasitas=sprintf ("/bin/mail andras\@fiserlab.org < $tmp/mail.txt\n");
-system(@utasitas);
-@utasitas=sprintf ("/bin/mail eashwar\@salilab.org < $tmp/mail.txt\n");
+@utasitas=sprintf ("/bin/mail modloop\@salilab.org < $tmp/mail.txt\n");
 system(@utasitas);
 unlink("/$tmp/mail.txt");
 
@@ -174,13 +176,13 @@ system(@utasitas);
 
   my $oldconfig="looptmp.top";
   my $newconf = "$tmp/$runname/loop-$bemenet.top";
-  open(NEWCONF,">$newconf");
-  open(OLDCONF,$oldconfig);
+  open(NEWCONF, ">$newconf") or die "Cannot open $newconf: $!";
+  open(OLDCONF, $oldconfig) or die "Cannot open $oldconfig: $!";
   while(my $line =  <OLDCONF> ) {
     $line =~ s/USR_NAME/$user_name/g;
     $line =~ s/USER_PDB/pdb-$bemenet.pdb/g;
 
-  for (my $j=0;$j<$i;$j++)
+  for (my $j=0;$j<$loops;$j++)
     {
       if ($line =~ /\#$j\#/)
 	{
@@ -200,8 +202,8 @@ system(@utasitas);
 # generate  codine script
   my $oldcodine="codinetmp.sh";
   my $newcodine = "codine-$bemenet.sh";
-  open(NEWCONF,">$tmp/$runname/$newcodine");
-  open(OLDCONF,$oldcodine);
+  open(NEWCONF, ">$tmp/$runname/$newcodine") or die "Cannot open: $!";
+  open(OLDCONF, $oldcodine) or die "Cannot open $oldcodine: $!";
   while(my $line =  <OLDCONF> ) 
     {
      $line =~ s/iteration/$iteration/g;
@@ -215,14 +217,14 @@ system(@utasitas);
   my $loopout;
   my $oldtext="toptext.tex";
   open(NEWCONF,">$tmp/$runname/toptext.tex");
-  open(OLDCONF,$oldtext);
+  open(OLDCONF, $oldtext) or die "Cannot open $oldtext: $!";
   while(my $line =  <OLDCONF> ) 
     {
     $line =~ s/USR_NAME/$user_name/g;
     $line =~ s/USER_PDB/pdb-$bemenet.pdb/g;
     
 $loopout="";
-for (my $j=0;$j<$i;$j++)
+for (my $j=0;$j<$loops;$j++)
     {
      $loopout = $loopout.$start_res[$j].":".$start_id[$j]."-".$end_res[$j].":".$end_id[$j]." "; 
    }
@@ -240,7 +242,7 @@ for (my $j=0;$j<$i;$j++)
 # already there
 
 my $topfile="";
-for ($i=1;$i<=$iteration;$i++)
+for (my $i=1;$i<=$iteration;$i++)
 {
     #get a random number here
     srand;
