@@ -12,84 +12,51 @@
 
 use Cwd;
 use CGI qw/:standard /;
-$tmp="/diva2/home/andras/html/tmploop/";
+use strict;
+
+my $tmp="/diva2/home/andras/html/tmploop/";
 
 ################################
 ###some defaults
- $number_of_users=10;         #simultaneous users
+my $number_of_users=10;         #simultaneous users
 
- $user_pdb_name="";          # uploaded pdb file name
- $iteration=300;             # number of loop models
- $user_name="loop";          # root name for loop models
- $szoveg="";
 ################################
 ### get parameters from html
 
- $user_pdb_name = param('user_pdb2');         # uploaded file name
- $iteration     = param('iteration')||300;     # number of models
- $user_name     = param('user_name');         # root name
- $email         = param('email');             # users e-mail
- $modkey        = param('modkey');            # passwd 
- $szoveg        = param('text');              # selected loops
+my $user_pdb_name = param('user_pdb2');         # uploaded file name
+my $iteration     = param('iteration')||300;     # number of models
+my $user_name     = param('user_name');         # root name
+my $email         = param('email');             # users e-mail
+my $modkey        = param('modkey');            # passwd 
+my $szoveg        = param('text');              # selected loops
 
 ################################
 ###check and fix iteration param
-if (($iteration < 1) || ($iteration > 400) || ($iteration == 0)) {$iteration=400};
+if ($iteration < 1 || $iteration > 400) {
+  $iteration = 400;
+}
 
 
 ################################
 ###check and fix loop name 
 $user_name =~ s/\s+//g;
 
+check_modeller_key($modkey);
 
-################################
-# check for passwd
+check_loop_selection($szoveg);
 
-$modkey =~ tr/a-z/A-Z/; 
-if ($modkey =~ /***REMOVED***/)
-  { $ok=1;}
-else {
-         print header(), start_html("MODLOOP ERROR"),
-         h2({-align=>'CENTER'},font({-color=>"#AA0000"},"ERROR!")),
-       hr,
-         h4({-align=>'CENTER'},font({-color=>"#AA0000"},"You have entered an invalid MODELLER KEY!")),
-         h4({-align=>'CENTER'},font({-color=>"#AA0000"},"Try again!")),
-         end_html(); exit;       
-     }
-
-################################
-# check for loop selection
-if ($szoveg eq "")
-  {
-         print header(), start_html("MODLOOP ERROR"),
-         h2({-align=>'CENTER'},font({-color=>"#AA0000"},"ERROR!")),
-       hr,
-         h4({-align=>'CENTER'},font({-color=>"#AA0000"},"No loop segments were specified!")),
-         h4({-align=>'CENTER'},font({-color=>"#AA0000"},"Try again!")),
-         end_html(); exit;       
-     }
-
-#################################
-### if pdb empty
-
-if ($user_pdb_name eq "")
-  {
-         print header(), start_html("MODLOOP ERROR"),
-         h2({-align=>'CENTER'},font({-color=>"#AA0000"},"ERROR!")),
-       hr,
-         h4({-align=>'CENTER'},font({-color=>"#AA0000"},"No coordinate file has been  submitted! Try again!")),
-         end_html(); exit;
-     }
+check_pdb_name($user_pdb_name);
 
 ###############################
 #### extract loops
 $szoveg =~ tr/a-z/A-Z/;    # capitalize
 $szoveg =~ s/\s+//g;       # remove spaces
-$loop_data[0] = -999;      # initialize
 
-@loop_data=split (/:/,$szoveg);
+my @loop_data=split (/:/,$szoveg);
 
-$i=0;$total_res=0;
+my $i=0;
+my $total_res=0;
+my (@start_res, @start_id, @end_res, @end_id);
 while ($loop_data[$i*4] ne "")
   {
     $start_res[$i]=$loop_data[$i*4];
@@ -115,12 +82,6 @@ while ($loop_data[$i*4] ne "")
   }
 
 
-#print header(), start_html("MODLOOP ERROR"),
-#         h2({-align=>'CENTER'},font({-color=>"#AA0000"},"szoveg:")),
-#       hr,
-#         h4({-align=>'CENTER'},font({-color=>"#AA0000"},"$start_id[0],$end_id[0],$start_id[1],$end_id[1],$start_id[2],$end_id[2],$start_id[3],$end_id[3]")),
-#         end_html(); exit;
-
 ################################
 # too many residues rejected
 if ($total_res > 20) 
@@ -136,28 +97,18 @@ if ($total_res > 20)
 #################################
 ### if email empty
 
-if (!$email || ($email eq "")) {
-	&end_modloop("Please provide an e-mail address, because results will be sent by email!");
-}
-
-unless ($email =~ /^[\w.+-]+\@[\w.+-]+$/) {
-	&end_modloop("Your email address contains special characters. Please enter a regular email address! ");
-}
+check_email($email);
 
 ##################################
 ### if there are too many users
 
-$pid=`ls -1  $tmp/modloop_* |wc | awk '{print \$2}'`;
-
-if ($pid > $number_of_users ) {
-
-         &end_modloop("The server queue has reached its maximum number of $number_of_users  simultaneous users. Please try later on!", "Sorry!");
-}
+check_users($tmp, $number_of_users);
 
 ###################################
 ### read coordinates from file, replace if needed the pdb_user
 
 $szoveg="";
+my $user_pdb = "";
 
 if ($user_pdb_name && ($user_pdb_name ne "")) 
    {
@@ -172,12 +123,12 @@ if ($user_pdb_name && ($user_pdb_name ne ""))
 ### generate a unique memo file for each submission
 
 srand;
-$bemenet = time()."_AF_".int(rand(1)*100000);
+my $bemenet = time()."_AF_".int(rand(1)*100000);
 
-#$user_name =~ s/[^\w]/\\\&/g;
 $user_name =~ s/[\/ ;\[\]\<\>&\t]/_/g;
 
-@utasitas=sprintf ("touch $tmp/modloop_$bemenet;chmod uog+rwx $tmp/modloop_$bemenet; echo $email $user_name $runname $bemenet $iteration > $tmp/modloop_$bemenet");
+my $runname = "do_modloop_" . $bemenet;
+my @utasitas=sprintf ("touch $tmp/modloop_$bemenet;chmod uog+rwx $tmp/modloop_$bemenet; echo $email $user_name $runname $bemenet $iteration > $tmp/modloop_$bemenet");
 system(@utasitas);
 
 @utasitas=sprintf ("chmod uog+rwx $tmp/modloop_$bemenet");
@@ -198,13 +149,11 @@ close (OUTMAIL);
 system(@utasitas);
 @utasitas=sprintf ("/bin/mail eashwar\@salilab.org < $tmp/mail.txt\n");
 system(@utasitas);
-system("rm /$tmp/mail.txt");
+unlink("/$tmp/mail.txt");
 
 ####################################
 ### create a run directory
 
-#$cwd = cwd();
-$runname = "do_modloop_" . $bemenet;
 system("mkdir -p $tmp/$runname");
 
 @utasitas=sprintf ("chmod uog+rwx $tmp/$runname/");
@@ -223,15 +172,15 @@ system(@utasitas);
 #################################
 ### generate top file 
 
-  $oldconfig="looptmp.top";
-  $newconf = "$tmp/$runname/loop-$bemenet.top";
+  my $oldconfig="looptmp.top";
+  my $newconf = "$tmp/$runname/loop-$bemenet.top";
   open(NEWCONF,">$newconf");
   open(OLDCONF,$oldconfig);
-  while( $line =  <OLDCONF> ) {
+  while(my $line =  <OLDCONF> ) {
     $line =~ s/USR_NAME/$user_name/g;
     $line =~ s/USER_PDB/pdb-$bemenet.pdb/g;
 
-  for ($j=0;$j<$i;$j++)
+  for (my $j=0;$j<$i;$j++)
     {
       if ($line =~ /\#$j\#/)
 	{
@@ -249,11 +198,11 @@ system(@utasitas);
 
 #################################
 # generate  codine script
-  $oldcodine="codinetmp.sh";
-  $newcodine = "codine-$bemenet.sh";
+  my $oldcodine="codinetmp.sh";
+  my $newcodine = "codine-$bemenet.sh";
   open(NEWCONF,">$tmp/$runname/$newcodine");
   open(OLDCONF,$oldcodine);
-  while( $line =  <OLDCONF> ) 
+  while(my $line =  <OLDCONF> ) 
     {
      $line =~ s/iteration/$iteration/g;
      print NEWCONF $line;
@@ -263,16 +212,17 @@ system(@utasitas);
 
 #################################
 # generate  pdb header
-  $oldtext="toptext.tex";
+  my $loopout;
+  my $oldtext="toptext.tex";
   open(NEWCONF,">$tmp/$runname/toptext.tex");
   open(OLDCONF,$oldtext);
-  while( $line =  <OLDCONF> ) 
+  while(my $line =  <OLDCONF> ) 
     {
     $line =~ s/USR_NAME/$user_name/g;
     $line =~ s/USER_PDB/pdb-$bemenet.pdb/g;
     
 $loopout="";
-for ($j=0;$j<$i;$j++)
+for (my $j=0;$j<$i;$j++)
     {
      $loopout = $loopout.$start_res[$j].":".$start_id[$j]."-".$end_res[$j].":".$end_id[$j]." "; 
    }
@@ -289,15 +239,12 @@ for ($j=0;$j<$i;$j++)
 #system("cp  $tmp/pdb-$bemenet.pdb $cwd/$runname/");
 # already there
 
-$topfile="";
+my $topfile="";
 for ($i=1;$i<=$iteration;$i++)
 {
     #get a random number here
     srand;
-    $random_seed=int(rand(1)*48000);$random_seed=$random_seed-49000;
-
-#e.g. old line(too long fielnames...)
-#    system("sed \"s;CODINE_RND;$random_seed;\" $tmp/$runname/loop-$bemenet.top > $tmp/$runname/ide; mv $tmp/$runname/ide $tmp/$runname/$i-loop-$bemenet.top");
+    my $random_seed=int(rand(1)*48000);$random_seed=$random_seed-49000;
 
     system("sed \"s;CODINE_RND;$random_seed;\" $tmp/$runname/loop-$bemenet.top > $tmp/$runname/ide; mv $tmp/$runname/ide $tmp/$runname/$i.top");
     $topfile=$topfile." $i.top";  # collect names for codine
@@ -310,12 +257,6 @@ system("sed \"s;DIR;$runname;\"  $tmp/$runname/codine-$bemenet.sh > $tmp/$runnam
 
 ###############################################
 ## write subject details into a file and pop up an exit page
-
-### write details , eventually run the modloop_sub.pl script from cron damon!!
-#@utasitas=sprintf("/usr/bin/perl Modloop_sub.pl $email $user_name $runname $bemenet $iteration  ");
-#system("@utasitas >/dev/null 2>/dev/null &");
-#system (" /usr/bin/perl Modloop_sub.pl $email $user_name $runname $bemenet $iteration >/dev/null  &");
-
 
 ### good bye
 
@@ -357,4 +298,67 @@ sub end_modloop {
 	print end_html;
 	exit;
 
+}
+
+# Quit with an error message
+sub quit_with_error {
+  my ($err) = @_;
+  print header(), start_html("MODLOOP ERROR"),
+        h2({-align=>'CENTER'},font({-color=>"#AA0000"},"ERROR!")), hr,
+        h4({-align=>'CENTER'},font({-color=>"#AA0000"}, $err)),
+        h4({-align=>'CENTER'},font({-color=>"#AA0000"},"Try again!")),
+        end_html();
+  exit;
+}
+
+# Check Modeller license key
+sub check_modeller_key {
+  my ($key) = @_;
+  if ($key ne "***REMOVED***") {
+    quit_with_error("You have entered an invalid MODELLER KEY!");
+  }
+}
+
+# Check for loop selection
+sub check_loop_selection {
+  my ($loop) = @_;
+  if ($loop eq "") {
+    quit_with_error("No loop segments were specified!");
+  }
+}
+
+# Check if a PDB name was specified
+sub check_pdb_name {
+  my ($pdb_name) = @_;
+  if ($pdb_name eq "") {
+    quit_with_error("No coordinate file has been submitted!");
+  }
+}
+
+# Check for valid email address
+sub check_email {
+  my ($email) = @_;
+
+  if (!$email || $email eq "") {
+    end_modloop("Please provide an e-mail address, because results will " .
+                "be sent by email!");
+  }
+
+  unless ($email =~ /^[\w.+-]+\@[\w.+-]+$/) {
+    end_modloop("Your email address contains special characters. " .
+                "Please enter a regular email address! ");
+  }
+}
+
+# Check for user limit
+sub check_users {
+  my ($tmp, $number_of_users) = @_;
+
+  my $pid=`ls -1  $tmp/modloop_* |wc | awk '{print \$2}'`;
+
+  if ($pid > $number_of_users ) {
+    end_modloop("The server queue has reached its maximum number of " .
+                "$number_of_users  simultaneous users. Please try later on!",
+                "Sorry!");
+  }
 }
