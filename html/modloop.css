@@ -12,6 +12,10 @@ body.help {
   font-size:medium;
 }
 
+a.help {
+  color:#800000;
+}
+
 p.description {
   margin-left:auto;
   margin-right:auto;
