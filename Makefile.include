@@ -1,0 +1,4 @@
+TOP=/diva1/home/modloop
+HTML=${TOP}/html
+CGI=${TOP}/cgi
+SCRIPTS=${TOP}/scripts
