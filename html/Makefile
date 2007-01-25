@@ -1,5 +1,7 @@
 include ../Makefile.include
-DISTFILES=index.html
+DISTFILES=bg_3.gif logo33-space.gif modloop_title_blue.gif logo33.gif \
+          pdfsml.gif index.html help.html
+
 
 install:
 	mkdir -p ${HTML}
