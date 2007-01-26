@@ -144,7 +144,9 @@ for (my $j=0;$j<$loops;$j++) {
 ##################################
 ### send a mail each time someone is using it
 
-open(OUTMAIL, "| /bin/mail modloop\@salilab.org") or die "Cannot open pipe: $!";
+open(OUTMAIL, "| /bin/mail -t modloop\@salilab.org")
+    or die "Cannot open pipe: $!";
+print OUTMAIL "Subject: ModLoop submission\n\n";
 print OUTMAIL "This is the  LOOP SERVER speaking!!\n\n";
 print OUTMAIL "who is attempting to use modloop? (e-mail):>$email<\n";
 print OUTMAIL "protein code: >$user_name<\n";
