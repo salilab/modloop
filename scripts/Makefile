@@ -1,6 +1,7 @@
 include ../Makefile.include
-DISTFILES=Modloop_sub.pl remove_modlooptmp.pl
 
 install:
 	mkdir -p ${SCRIPTS}
-	cp ${DISTFILES} ${SCRIPTS}
+	sed -e 's#@QUEUEDIR@#${QUEUEDIR}#' -e 's#@SCRIPTS@#${SCRIPTS}#' < Modloop_sub.pl > ${SCRIPTS}/Modloop_sub.pl
+	chmod 755 ${SCRIPTS}/Modloop_sub.pl
+	cp codinetmp.sh ${SCRIPTS}

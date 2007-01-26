@@ -34,13 +34,12 @@ my $email         = param('email');             # users e-mail
 my $modkey        = param('modkey')||"";        # passwd 
 my $szoveg        = param('text')||"";          # selected loops
 
-$iteration = 5;
-
 ################################
 ###check and fix iteration param
 if ($iteration < 1 || $iteration > 400) {
   $iteration = 400;
 }
+  $iteration = 4;
 
 
 ################################
@@ -133,9 +132,8 @@ my $jobid = time()."_AF_".int(rand(1)*100000);
 
 $user_name =~ s/[\/ ;\[\]\<\>&\t]/_/g;
 
-my $runname = "do_modloop_$jobid";
 open(JOBFILE, "> $tmp/modloop_$jobid") or die "Cannot create job file: $!";
-print JOBFILE "$email $user_name $runname $jobid $iteration\n";
+print JOBFILE "$email $user_name $jobid $iteration\n";
 close(JOBFILE);
 
 my $loopout = "";
@@ -155,15 +153,10 @@ print OUTMAIL "job id: >$jobid<\n";
 print OUTMAIL "\n\n...adios...\n";
 close (OUTMAIL);
 
-####################################
-### create a run directory
-
-mkdir("$tmp/$runname", 0755) or die "Cannot create run directory: $!";
-
 ###################################
 ### write pdb output
 
-open(OUT,">$tmp/$runname/pdb-$jobid.pdb");
+open(OUT,">$tmp/pdb-$jobid.pdb");
 print OUT $user_pdb;
 close(OUT);
 
@@ -171,7 +164,7 @@ close(OUT);
 ### generate top file 
 
   my $oldconfig="looptmp.top";
-  my $newconf = "$tmp/$runname/loop-$jobid.top";
+  my $newconf = "$tmp/loop-$jobid.top";
   open(NEWCONF, ">$newconf") or die "Cannot open $newconf: $!";
   open(OLDCONF, $oldconfig) or die "Cannot open $oldconfig: $!";
   while(my $line =  <OLDCONF> ) {
@@ -197,7 +190,7 @@ close(OUT);
 #################################
 # generate  pdb header
   my $oldtext="toptext.tex";
-  open(NEWCONF, ">$tmp/$runname/toptext.tex") or die "Cannot open: $!";
+  open(NEWCONF, ">$tmp/toptext-$jobid.tex") or die "Cannot open: $!";
   open(OLDCONF, $oldtext) or die "Cannot open $oldtext: $!";
   while(my $line =  <OLDCONF> ) 
     {
@@ -210,43 +203,6 @@ close(OUT);
     }
   close(OLDCONF);
   close(NEWCONF);
-
-####################################
-### generate  top files
-my $topfile="";
-for (my $i=1;$i<=$iteration;$i++)
-{
-    #get a random number here
-    my $random_seed = int(rand(1)*48000) - 49000;
-    open(INFILE, "$tmp/$runname/loop-$jobid.top")
-        or die "Cannot open input: $!";
-    open(OUTFILE, "> $tmp/$runname/$i.top")
-        or die "Cannot open output: $!";
-    while(<INFILE>) {
-      s/CODINE_RND/$random_seed/;
-      s/item/$i/;
-      print OUTFILE;
-    }
-    close(INFILE);
-    close(OUTFILE);
-    $topfile=$topfile." $i.top";  # collect names for codine
-}
-
-#################################
-# generate  codine script
-  my $oldcodine="codinetmp.sh";
-  my $newcodine = "codine-$jobid.sh";
-  open(NEWCONF, ">$tmp/$runname/$newcodine") or die "Cannot open: $!";
-  open(OLDCONF, $oldcodine) or die "Cannot open $oldcodine: $!";
-  while(<OLDCONF>) {
-    s/iteration/$iteration/g;
-    s/TOPFILES/$topfile/;
-    s/DIR/$runname/;
-    print NEWCONF;
-  }
-  close(OLDCONF);
-  close(NEWCONF);
-
 
 ###############################################
 ## write subject details into a file and pop up an exit page
