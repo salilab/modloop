@@ -17,6 +17,10 @@ my $queuedir="@QUEUEDIR@";
 my $scriptsdir="@SCRIPTS@";
 my $rundir="$queuedir/../running";
 
+# SGE setup
+$ENV{'SGE_ROOT'} = "/home/sge6";
+my $sge_bindir = "/home/sge6/bin/sol-sparc64";
+
 # Submit any new jobs
 chdir($queuedir);
 my @queue = glob("modloop*");
@@ -101,7 +105,7 @@ sub submit_jobs {
     generate_files($iteration, $email, $jobid, $jobdir);
 
     # SGE run
-    my $result = `/home/sge6/bin/sol-sparc64/qsub codine-$jobid.sh`;
+    my $result = `${sge_bindir}/qsub codine-$jobid.sh`;
 
     if ($result =~ /Your job (\d+)\./) {
       my $sge_jobid = $1;
@@ -127,7 +131,7 @@ sub check_finished_jobs {
           or die "Cannot open job ID file $job/sge-jobid: $!";
       my $sge_jobid = <FILE>;
       chomp $sge_jobid;
-      my $status = `/home/sge6/bin/sol-sparc64/qstat -j $sge_jobid 2>&1`;
+      my $status = `${sge_bindir}/qstat -j $sge_jobid 2>&1`;
       if ($status =~ /^Following jobs do not exist/) {
         finish_job($job);
         unlink("$job/sge-jobid") or die "Cannot delete sge-jobid: $!";
