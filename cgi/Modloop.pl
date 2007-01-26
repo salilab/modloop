@@ -10,15 +10,15 @@
 #                                                             #
 ###############################################################
 
+use strict;
 use Cwd;
 use CGI qw/:standard /;
-use CGI::Carp
+use CGI::Carp;
 # To catch all fatal errors in the browser:
 #use CGI::Carp qw(fatalsToBrowser);
-use strict;
 
 # Substituted in at install time by Makefile:
-my $tmp="@RUNDIR@";
+my $tmp="@QUEUEDIR@";
 
 ################################
 ###some defaults
@@ -92,16 +92,14 @@ while ($loops*4+3 <= $#loop_data and $loop_data[$loops*4] ne "") {
 
 
 ################################
-# too many residues rejected
-if ($total_res > 20) 
-  {
-         print header(), start_html("MODLOOP ERROR"),
-         h2({-align=>'CENTER'},font({-color=>"#AA0000"},"ERROR!")),
-       hr,
-         h4({-align=>'CENTER'},font({-color=>"#AA0000"},"Too many loop residues have been selected (selected:$total_res > limit:20) ! ")),
-         h4({-align=>'CENTER'},font({-color=>"#AA0000"},"Please correct! Try again!")),
-         end_html(); exit;       
-     }
+# too many or no residues rejected
+if ($total_res > 20) {
+  quit_with_error("Too many loop residues have been selected ".
+                  " (selected:$total_res > limit:20)!");
+}
+if ($total_res <= 0) {
+  quit_with_error("No loop residues selected!");
+}
 
 #################################
 ### if email empty
@@ -169,9 +167,6 @@ open(OUT,">$tmp/$runname/pdb-$jobid.pdb");
 print OUT $user_pdb;
 close(OUT);
 
-my @utasitas=sprintf ("chmod uog+rwx $tmp/$runname/pdb-$jobid.pdb");
-system(@utasitas);
-
 #################################
 ### generate top file 
 
@@ -200,20 +195,6 @@ system(@utasitas);
   close(NEWCONF);
 
 #################################
-# generate  codine script
-  my $oldcodine="codinetmp.sh";
-  my $newcodine = "codine-$jobid.sh";
-  open(NEWCONF, ">$tmp/$runname/$newcodine") or die "Cannot open: $!";
-  open(OLDCONF, $oldcodine) or die "Cannot open $oldcodine: $!";
-  while(my $line =  <OLDCONF> ) 
-    {
-     $line =~ s/iteration/$iteration/g;
-     print NEWCONF $line;
-    }
-  close(OLDCONF);
-  close(NEWCONF);
-
-#################################
 # generate  pdb header
   my $oldtext="toptext.tex";
   open(NEWCONF, ">$tmp/$runname/toptext.tex") or die "Cannot open: $!";
@@ -231,24 +212,41 @@ system(@utasitas);
   close(NEWCONF);
 
 ####################################
-### copy/generate  pdb/top/sh files in $tmp directory
-# already there
-
+### generate  top files
 my $topfile="";
 for (my $i=1;$i<=$iteration;$i++)
 {
     #get a random number here
-    srand;
-    my $random_seed=int(rand(1)*48000);$random_seed=$random_seed-49000;
-
-    system("sed \"s;CODINE_RND;$random_seed;\" $tmp/$runname/loop-$jobid.top > $tmp/$runname/ide; mv $tmp/$runname/ide $tmp/$runname/$i.top");
+    my $random_seed = int(rand(1)*48000) - 49000;
+    open(INFILE, "$tmp/$runname/loop-$jobid.top")
+        or die "Cannot open input: $!";
+    open(OUTFILE, "> $tmp/$runname/$i.top")
+        or die "Cannot open output: $!";
+    while(<INFILE>) {
+      s/CODINE_RND/$random_seed/;
+      s/item/$i/;
+      print OUTFILE;
+    }
+    close(INFILE);
+    close(OUTFILE);
     $topfile=$topfile." $i.top";  # collect names for codine
-    system("sed \"s;item;$i;\" $tmp/$runname/$i.top >  $tmp/$runname/ide; mv $tmp/$runname/ide $tmp/$runname/$i.top");
 }
 
-###fix codine with job inputs
-system("sed \"s;TOPFILES;$topfile;\"  $tmp/$runname/codine-$jobid.sh > $tmp/$runname/ide; mv $tmp/$runname/ide  $tmp/$runname/codine-$jobid.sh");
-system("sed \"s;DIR;$runname;\"  $tmp/$runname/codine-$jobid.sh > $tmp/$runname/ide; mv $tmp/$runname/ide  $tmp/$runname/codine-$jobid.sh");
+#################################
+# generate  codine script
+  my $oldcodine="codinetmp.sh";
+  my $newcodine = "codine-$jobid.sh";
+  open(NEWCONF, ">$tmp/$runname/$newcodine") or die "Cannot open: $!";
+  open(OLDCONF, $oldcodine) or die "Cannot open $oldcodine: $!";
+  while(<OLDCONF>) {
+    s/iteration/$iteration/g;
+    s/TOPFILES/$topfile/;
+    s/DIR/$runname/;
+    print NEWCONF;
+  }
+  close(OLDCONF);
+  close(NEWCONF);
+
 
 ###############################################
 ## write subject details into a file and pop up an exit page
@@ -263,7 +261,7 @@ print header(), start_html("MODLOOP SUBMITTED"),
          h4({-align=>'LEFT'},font({-color=>"#AA0000"},"using the method of Fiser et al. (Prot. Sci. (2000) 9,1753-1773")),
          h4({-align=>'LEFT'},font({-color=>"#AA0000"},"You will receive the protein coordinate file with the optimized loop region by e-mail, to the adress: $email")),
         h4({-align=>'LEFT'},font({-color=>"#AA0000"},"The estimated execution time is ~90 min, depending on the load..")),
-        h4({-align=>'LEFT'},font({-color=>"#AA0000"},"If you experience a problem or you do not receive the results for more than  12 hours, please contact afiser\@aecom.yu.edu")),
+        h4({-align=>'LEFT'},font({-color=>"#AA0000"},"If you experience a problem or you do not receive the results for more than  12 hours, please contact modloop\@salilab.org")),
 h4({-align=>'CENTER'},font({-color=>"#AA0000"},"Thank you for using our server and good luck in your research!")),
     h4({-align=>'RIGHT'},font({-color=>"#AA0000"},"Andras Fiser")),
 	hr,
@@ -351,7 +349,7 @@ sub check_users {
 
   my @oldruns = glob("$tmp/modloop_*");
 
-  if (scalar(@oldruns) > $number_of_users ) {
+  if (scalar(@oldruns) >= $number_of_users ) {
     end_modloop("The server queue has reached its maximum number of " .
                 "$number_of_users  simultaneous users. Please try later on!",
                 "Sorry!");
