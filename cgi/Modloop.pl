@@ -303,7 +303,7 @@ sub check_email {
 sub check_users {
   my ($tmp, $number_of_users) = @_;
 
-  my @oldruns = glob("$tmp/modloop_*");
+  my @oldruns = (glob("$tmp/modloop_*"), glob("$tmp/../running/*/sge-jobid"));
 
   if (scalar(@oldruns) >= $number_of_users ) {
     end_modloop("The server queue has reached its maximum number of " .
