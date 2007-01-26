@@ -6,3 +6,4 @@ DISTFILES=bg_3.gif modloop_title_blue.gif logo33.gif \
 install:
 	mkdir -p ${HTML}
 	cp ${DISTFILES} ${HTML}
+	(cd ${HTML} && rm -f modloop.html && ln -s index.html modloop.html)
