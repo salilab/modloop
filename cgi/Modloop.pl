@@ -39,7 +39,6 @@ my $szoveg        = param('text')||"";          # selected loops
 if ($iteration < 1 || $iteration > 400) {
   $iteration = 400;
 }
-  $iteration = 4;
 
 
 ################################
