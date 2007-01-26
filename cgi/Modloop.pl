@@ -12,6 +12,9 @@
 
 use Cwd;
 use CGI qw/:standard /;
+use CGI::Carp
+# To catch all fatal errors in the browser:
+#use CGI::Carp qw(fatalsToBrowser);
 use strict;
 
 # Substituted in at install time by Makefile:
@@ -30,6 +33,8 @@ my $user_name     = param('user_name')||"";     # root name
 my $email         = param('email');             # users e-mail
 my $modkey        = param('modkey')||"";        # passwd 
 my $szoveg        = param('text')||"";          # selected loops
+
+$iteration = 5;
 
 ################################
 ###check and fix iteration param
@@ -52,14 +57,14 @@ check_pdb_name($user_pdb_name);
 #### extract loops
 $szoveg =~ tr/a-z/A-Z/;    # capitalize
 $szoveg =~ s/\s+//g;       # remove spaces
+$szoveg =~ s/::/: :/g;     # replace null chain IDs with a single space
 
 my @loop_data=split (/:/,$szoveg);
 
 my $total_res=0;
 my (@start_res, @start_id, @end_res, @end_id);
-my $loops;
-for ($loops = 0; $loops*4+3 <= $#loop_data and $loop_data[$loops*4] ne "";
-     $loops++) {
+my $loops = 0;
+while ($loops*4+3 <= $#loop_data and $loop_data[$loops*4] ne "") {
     $start_res[$loops]=$loop_data[$loops*4];
     $start_id[$loops]=$loop_data[$loops*4+1];
     $end_res[$loops]=$loop_data[$loops*4+2];
@@ -82,6 +87,7 @@ for ($loops = 0; $loops*4+3 <= $#loop_data and $loop_data[$loops*4] ne "";
        h4({-align=>'CENTER'},font({-color=>"#AA0000"},"Please correct! Try again!")),
        end_html(); exit;       
      }
+    $loops++;
   }
 
 
@@ -115,11 +121,9 @@ my $user_pdb = "";
 
 if ($user_pdb_name && ($user_pdb_name ne "")) 
    {
-     open(FILE, "$user_pdb_name") or die "Cannot open $user_pdb_name: $!";
-     while (<FILE>)  {
+     while (<$user_pdb_name>)  {
        $szoveg .= $_;
      }
-     close FILE;
     $user_pdb=$szoveg;
      }
 
@@ -127,60 +131,57 @@ if ($user_pdb_name && ($user_pdb_name ne ""))
 ### generate a unique memo file for each submission
 
 srand;
-my $bemenet = time()."_AF_".int(rand(1)*100000);
+my $jobid = time()."_AF_".int(rand(1)*100000);
 
 $user_name =~ s/[\/ ;\[\]\<\>&\t]/_/g;
 
-my $runname = "do_modloop_" . $bemenet;
-my @utasitas=sprintf ("touch $tmp/modloop_$bemenet;chmod uog+rwx $tmp/modloop_$bemenet; echo $email $user_name $runname $bemenet $iteration > $tmp/modloop_$bemenet");
-system(@utasitas);
+my $runname = "do_modloop_$jobid";
+open(JOBFILE, "> $tmp/modloop_$jobid") or die "Cannot create job file: $!";
+print JOBFILE "$email $user_name $runname $jobid $iteration\n";
+close(JOBFILE);
 
-@utasitas=sprintf ("chmod uog+rwx $tmp/modloop_$bemenet");
-system(@utasitas);
+my $loopout = "";
+for (my $j=0;$j<$loops;$j++) {
+  $loopout .= $start_res[$j].":".$start_id[$j]."-".$end_res[$j].":".$end_id[$j]." "; 
+}
 
 ##################################
 ### send a mail each time someone is using it
 
-open(OUTMAIL,">$tmp/mail.txt");
+open(OUTMAIL, "| /bin/mail modloop\@salilab.org") or die "Cannot open pipe: $!";
 print OUTMAIL "This is the  LOOP SERVER speaking!!\n\n";
-print OUTMAIL "who is attempting to use modloop? (e-mail):>",$email,"<\n";
-print OUTMAIL "protein code: >",$user_name,"<\n";
-print OUTMAIL "loops: >",@loop_data,"<\n";
-print OUTMAIL "job id: >",$bemenet,"<\n";
+print OUTMAIL "who is attempting to use modloop? (e-mail):>$email<\n";
+print OUTMAIL "protein code: >$user_name<\n";
+print OUTMAIL "loops: >$loopout<\n";
+print OUTMAIL "job id: >$jobid<\n";
 print OUTMAIL "\n\n...adios...\n";
 close (OUTMAIL);
-@utasitas=sprintf ("/bin/mail modloop\@salilab.org < $tmp/mail.txt\n");
-system(@utasitas);
-unlink("/$tmp/mail.txt");
 
 ####################################
 ### create a run directory
 
-system("mkdir -p $tmp/$runname");
-
-@utasitas=sprintf ("chmod uog+rwx $tmp/$runname/");
-system(@utasitas);
+mkdir("$tmp/$runname", 0755) or die "Cannot create run directory: $!";
 
 ###################################
 ### write pdb output
 
-open(OUT,">$tmp/$runname/pdb-$bemenet.pdb");
+open(OUT,">$tmp/$runname/pdb-$jobid.pdb");
 print OUT $user_pdb;
 close(OUT);
 
-@utasitas=sprintf ("chmod uog+rwx $tmp/$runname/pdb-$bemenet.pdb");
+my @utasitas=sprintf ("chmod uog+rwx $tmp/$runname/pdb-$jobid.pdb");
 system(@utasitas);
 
 #################################
 ### generate top file 
 
   my $oldconfig="looptmp.top";
-  my $newconf = "$tmp/$runname/loop-$bemenet.top";
+  my $newconf = "$tmp/$runname/loop-$jobid.top";
   open(NEWCONF, ">$newconf") or die "Cannot open $newconf: $!";
   open(OLDCONF, $oldconfig) or die "Cannot open $oldconfig: $!";
   while(my $line =  <OLDCONF> ) {
     $line =~ s/USR_NAME/$user_name/g;
-    $line =~ s/USER_PDB/pdb-$bemenet.pdb/g;
+    $line =~ s/USER_PDB/pdb-$jobid.pdb/g;
 
   for (my $j=0;$j<$loops;$j++)
     {
@@ -201,7 +202,7 @@ system(@utasitas);
 #################################
 # generate  codine script
   my $oldcodine="codinetmp.sh";
-  my $newcodine = "codine-$bemenet.sh";
+  my $newcodine = "codine-$jobid.sh";
   open(NEWCONF, ">$tmp/$runname/$newcodine") or die "Cannot open: $!";
   open(OLDCONF, $oldcodine) or die "Cannot open $oldcodine: $!";
   while(my $line =  <OLDCONF> ) 
@@ -214,21 +215,14 @@ system(@utasitas);
 
 #################################
 # generate  pdb header
-  my $loopout;
   my $oldtext="toptext.tex";
-  open(NEWCONF,">$tmp/$runname/toptext.tex");
+  open(NEWCONF, ">$tmp/$runname/toptext.tex") or die "Cannot open: $!";
   open(OLDCONF, $oldtext) or die "Cannot open $oldtext: $!";
   while(my $line =  <OLDCONF> ) 
     {
     $line =~ s/USR_NAME/$user_name/g;
-    $line =~ s/USER_PDB/pdb-$bemenet.pdb/g;
+    $line =~ s/USER_PDB/pdb-$jobid.pdb/g;
     
-$loopout="";
-for (my $j=0;$j<$loops;$j++)
-    {
-     $loopout = $loopout.$start_res[$j].":".$start_id[$j]."-".$end_res[$j].":".$end_id[$j]." "; 
-   }
-
      $line =~ s/LOOP_LIST/$loopout/g;
      $line =~ s/iteration/$iteration/g;
      print NEWCONF $line;
@@ -238,7 +232,6 @@ for (my $j=0;$j<$loops;$j++)
 
 ####################################
 ### copy/generate  pdb/top/sh files in $tmp directory
-#system("cp  $tmp/pdb-$bemenet.pdb $cwd/$runname/");
 # already there
 
 my $topfile="";
@@ -248,14 +241,14 @@ for (my $i=1;$i<=$iteration;$i++)
     srand;
     my $random_seed=int(rand(1)*48000);$random_seed=$random_seed-49000;
 
-    system("sed \"s;CODINE_RND;$random_seed;\" $tmp/$runname/loop-$bemenet.top > $tmp/$runname/ide; mv $tmp/$runname/ide $tmp/$runname/$i.top");
+    system("sed \"s;CODINE_RND;$random_seed;\" $tmp/$runname/loop-$jobid.top > $tmp/$runname/ide; mv $tmp/$runname/ide $tmp/$runname/$i.top");
     $topfile=$topfile." $i.top";  # collect names for codine
     system("sed \"s;item;$i;\" $tmp/$runname/$i.top >  $tmp/$runname/ide; mv $tmp/$runname/ide $tmp/$runname/$i.top");
 }
 
 ###fix codine with job inputs
-system("sed \"s;TOPFILES;$topfile;\"  $tmp/$runname/codine-$bemenet.sh > $tmp/$runname/ide; mv $tmp/$runname/ide  $tmp/$runname/codine-$bemenet.sh");
-system("sed \"s;DIR;$runname;\"  $tmp/$runname/codine-$bemenet.sh > $tmp/$runname/ide; mv $tmp/$runname/ide  $tmp/$runname/codine-$bemenet.sh");
+system("sed \"s;TOPFILES;$topfile;\"  $tmp/$runname/codine-$jobid.sh > $tmp/$runname/ide; mv $tmp/$runname/ide  $tmp/$runname/codine-$jobid.sh");
+system("sed \"s;DIR;$runname;\"  $tmp/$runname/codine-$jobid.sh > $tmp/$runname/ide; mv $tmp/$runname/ide  $tmp/$runname/codine-$jobid.sh");
 
 ###############################################
 ## write subject details into a file and pop up an exit page
@@ -265,7 +258,7 @@ system("sed \"s;DIR;$runname;\"  $tmp/$runname/codine-$bemenet.sh > $tmp/$runnam
 print header(), start_html("MODLOOP SUBMITTED"),
          h2({-align=>'CENTER'},font({-color=>"#AA0000"},"Dear User")),
        hr,
-         h4({-align=>'CENTER'},font({-color=>"#AA0000"},"Your job has been submitted to the server! Your process ID is $bemenet")),
+         h4({-align=>'CENTER'},font({-color=>"#AA0000"},"Your job has been submitted to the server! Your process ID is $jobid")),
          h4({-align=>'LEFT'},font({-color=>"#AA0000"},"The following loop segment(s) will be optimized: $loopout in protein: >$user_name< ")),
          h4({-align=>'LEFT'},font({-color=>"#AA0000"},"using the method of Fiser et al. (Prot. Sci. (2000) 9,1753-1773")),
          h4({-align=>'LEFT'},font({-color=>"#AA0000"},"You will receive the protein coordinate file with the optimized loop region by e-mail, to the adress: $email")),
@@ -356,9 +349,9 @@ sub check_email {
 sub check_users {
   my ($tmp, $number_of_users) = @_;
 
-  my $pid=`ls -1  $tmp/modloop_* |wc | awk '{print \$2}'`;
+  my @oldruns = glob("$tmp/modloop_*");
 
-  if ($pid > $number_of_users ) {
+  if (scalar(@oldruns) > $number_of_users ) {
     end_modloop("The server queue has reached its maximum number of " .
                 "$number_of_users  simultaneous users. Please try later on!",
                 "Sorry!");
