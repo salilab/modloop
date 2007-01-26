@@ -1,3 +1,2 @@
-07 01 * * * /diva1/home/ursula/remove_modlooptmp.pl
-# modloop demon, hourly wake up....
-10,30,50 * * * *  /usr/bin/tcsh -c "/usr/bin/perl /diva2/home/andras/cgi/modloop/Modloop_sub.pl"
+# modloop daemon
+0,15,30,45 * * * * /diva1/home/modloop/scripts/Modloop_sub.pl
