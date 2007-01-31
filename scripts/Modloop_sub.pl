@@ -139,9 +139,12 @@ sub check_finished_jobs {
         # Complain about running jobs after 7 days
         print "ModLoop job $job still running...\n";
       }
-    } elsif ($timenow - $statlst[9] > 60*60*24*15) {
-      # Delete finished jobs more than 15 days old
-      rmtree($job);
+    } else {
+      @statlst = stat($job);
+      if (defined(@statlst) and $timenow - $statlst[9] > 60*60*24*15) {
+        # Delete finished job directories more than 15 days old
+        rmtree($job);
+      }
     }
   }
 }
