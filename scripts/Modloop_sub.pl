@@ -126,7 +126,7 @@ sub check_finished_jobs {
     chdir($tmp);
     my @statlst = stat("$job/sge-jobid");
     my $timenow = time();
-    if (defined(@statlst)) {
+    if (@statlst) {
       open(FILE, "$job/sge-jobid")
           or die "Cannot open job ID file $job/sge-jobid: $!";
       my $sge_jobid = <FILE>;
@@ -141,7 +141,7 @@ sub check_finished_jobs {
       }
     } else {
       @statlst = stat($job);
-      if (defined(@statlst) and $timenow - $statlst[9] > 60*60*24*15) {
+      if (@statlst and $timenow - $statlst[9] > 60*60*24*15) {
         # Delete finished job directories more than 15 days old
         rmtree($job);
       }
