@@ -79,7 +79,6 @@ sub submit_jobs {
   my ($queuedir, $rundir, @queue) = @_;
 
   foreach (@queue) {
-    chdir($queuedir);
     open (TMPIN, $_);
     my $line = <TMPIN>;
     my @bejon = split ( / /,$line );
@@ -89,15 +88,12 @@ sub submit_jobs {
     my $iteration= $bejon[3];   
     close TMPIN;
 
-    # Take ownership (from nobody) and move to running directory
+    # Take ownership (from nobody) and copy to running directory
     my $jobdir = "$rundir/$jobid";
     mkdir($jobdir, 0755) or die "Cannot make run directory $jobdir: $!";
     my @files = ("loop-$jobid.top", "pdb-$jobid.pdb", "toptext-$jobid.tex");
     for my $file (@files) {
       copy($file, $jobdir) or die "Copy of $file failed: $!";
-    }
-    for my $file (@files, "modloop_$jobid") {
-      unlink $file or die "Delete of $file failed: $!";
     }
     chdir($jobdir) or die "Cannot change to $jobdir: $!";
 
@@ -114,6 +110,12 @@ sub submit_jobs {
       close(OUT);
     } else {
       die "Cannot parse SGE output: $result";
+    }
+
+    # Remove job from queue
+    chdir($queuedir);
+    for my $file (@files, "modloop_$jobid") {
+      unlink $file or die "Delete of $file failed: $!";
     }
   }
 }
