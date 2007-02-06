@@ -1,6 +1,6 @@
 TOP=/diva1/home/modloop
-QUEUEDIR=/diva3/home/modloop_runs/queue
-RUNDIR=/diva3/home/modloop_runs/running
+QUEUEDIR=/alto3/home/modloop_runs/queue
+RUNDIR=/alto3/home/modloop_runs/running
 
 HTML=${TOP}/html
 CGI=${TOP}/cgi
