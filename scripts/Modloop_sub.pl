@@ -32,18 +32,18 @@ my @running = glob("*AF*");
 check_finished_jobs($rundir, @running);
 
 
-# Generate .top and SGE script
+# Generate Modeller input and SGE script
 sub generate_files {
   my ($iteration, $email, $jobid, $rundir) = @_;
 
-  ### generate  top files
-  my $topfile="";
+  ### generate Modeller input files
+  my $infile="";
   for (my $i = 1; $i <= $iteration; $i++) {
     #get a random number here
     my $random_seed = int(rand(1)*48000) - 49000;
-    open(INFILE, "loop-$jobid.top")
+    open(INFILE, "loop-$jobid.py")
         or die "Cannot open input: $!";
-    open(OUTFILE, "> $i.top")
+    open(OUTFILE, "> $i.py")
         or die "Cannot open output: $!";
     while(<INFILE>) {
       s/CODINE_RND/$random_seed/;
@@ -52,7 +52,7 @@ sub generate_files {
     }
     close(INFILE);
     close(OUTFILE);
-    $topfile .= " $i.top";  # collect names for codine
+    $infile .= " $i.py";  # collect names for codine
   }
 
   # generate codine script
@@ -62,7 +62,7 @@ sub generate_files {
   open(OLDCONF, $oldcodine) or die "Cannot open $oldcodine: $!";
   while(<OLDCONF>) {
     s/iteration/$iteration/g;
-    s/INFILES/$topfile/g;
+    s/INFILES/$infile/g;
     s/DIR/$rundir/g;
     print NEWCONF;
   }
@@ -91,7 +91,7 @@ sub submit_jobs {
     # Take ownership (from nobody) and copy to running directory
     my $jobdir = "$rundir/$jobid";
     mkdir($jobdir, 0755) or die "Cannot make run directory $jobdir: $!";
-    my @files = ("loop-$jobid.top", "pdb-$jobid.pdb", "toptext-$jobid.tex");
+    my @files = ("loop-$jobid.py", "pdb-$jobid.pdb", "toptext-$jobid.tex");
     for my $file (@files) {
       copy($file, $jobdir) or die "Copy of $file failed: $!";
     }

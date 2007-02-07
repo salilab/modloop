@@ -4,4 +4,4 @@ install:
 	mkdir -p ${CGI}
 	sed -e 's#@QUEUEDIR@#${QUEUEDIR}#' < Modloop.pl > ${CGI}/Modloop.pl
 	chmod 755 ${CGI}/Modloop.pl
-	cp looptmp.top toptext.tex ${CGI}
+	cp toptext.tex ${CGI}

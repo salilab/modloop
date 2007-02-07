@@ -155,29 +155,25 @@ print OUT $user_pdb;
 close(OUT);
 
 #################################
-### generate top file 
+### generate Modeller input file 
 
-  my $oldconfig="looptmp.top";
-  my $newconf = "$tmp/loop-$jobid.top";
+  my $oldconfig = "../scripts/looptmp.py";
+  my $newconf = "$tmp/loop-$jobid.py";
   open(NEWCONF, ">$newconf") or die "Cannot open $newconf: $!";
   open(OLDCONF, $oldconfig) or die "Cannot open $oldconfig: $!";
   while(my $line =  <OLDCONF> ) {
-    $line =~ s/USR_NAME/$user_name/g;
+    $line =~ s/USER_NAME/$user_name/g;
     $line =~ s/USER_PDB/pdb-$jobid.pdb/g;
-
-  for (my $j=0;$j<$loops;$j++)
-    {
-      if ($line =~ /\#$j\#/)
-	{
-        $line =~ s/START_RES/$start_res[$j]/g;
-        $line =~ s/START_ID/$start_id[$j]/g;
-        $line =~ s/END_RES/$end_res[$j]/g;
-        $line =~ s/END_ID/$end_id[$j]/g; 
-        $line =~ s/\#$j\#//g; 
-        } 
-    } 
-    print NEWCONF $line;
+    if ($line =~ /RESIDUE_RANGE/) {
+      for (my $j = 0; $j < $loops; $j++) {
+        print NEWCONF "          self.residue_range(" .
+                      "'$start_res[$j]:$start_id[$j]', " .
+                      "'$end_res[$j]:$end_id[$j]'),\n";
+      }
+    } else {
+      print NEWCONF $line;
     }
+  }
   close(OLDCONF);
   close(NEWCONF);
 
@@ -188,7 +184,7 @@ close(OUT);
   open(OLDCONF, $oldtext) or die "Cannot open $oldtext: $!";
   while(my $line =  <OLDCONF> ) 
     {
-    $line =~ s/USR_NAME/$user_name/g;
+    $line =~ s/USER_NAME/$user_name/g;
     $line =~ s/USER_PDB/pdb-$jobid.pdb/g;
     
      $line =~ s/LOOP_LIST/$loopout/g;
