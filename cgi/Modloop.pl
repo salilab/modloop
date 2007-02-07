@@ -67,7 +67,8 @@ while ($loops*4+3 <= $#loop_data and $loop_data[$loops*4] ne "") {
     $start_id[$loops]=$loop_data[$loops*4+1];
     $end_res[$loops]=$loop_data[$loops*4+2];
     $end_id[$loops]=$loop_data[$loops*4+3];
-    $total_res=$total_res+($end_res[$loops]-$start_res[$loops]); #all the selected residues
+    #all the selected residues
+    $total_res += ($end_res[$loops] - $start_res[$loops] + 1);
 
     ################################
     # too long loops rejected
@@ -110,18 +111,10 @@ check_email($email);
 check_users($tmp, $number_of_users);
 
 ###################################
-### read coordinates from file, replace if needed the pdb_user
+### read coordinates from file, and check loop residues
 
-$szoveg="";
-my $user_pdb = "";
-
-if ($user_pdb_name && ($user_pdb_name ne "")) 
-   {
-     while (<$user_pdb_name>)  {
-       $szoveg .= $_;
-     }
-    $user_pdb=$szoveg;
-     }
+my $user_pdb = read_pdb_file($user_pdb_name, $loops, \@start_res, \@start_id,
+                             \@end_res, \@end_id);
 
 ##################################
 ### generate a unique memo file for each submission
@@ -312,3 +305,48 @@ sub check_users {
                 "Sorry!");
   }
 }
+
+# Return a "chain:resnum" residue ID
+sub make_residue_id {
+  my ($chain, $residue) = @_;
+  $chain =~ s/ //g;
+  $residue =~ s/ //g;
+  return "$residue:$chain";
+}
+
+# Read in uploaded PDB file, and check loop residues
+sub read_pdb_file {
+  my ($pdb, $loops, $start_res, $start_id, $end_res, $end_id) = @_;
+
+  my $file_contents = "";
+  my %residues;
+  for (my $i = 0; $i < $loops; $i++) {
+    my $resid = make_residue_id($start_id[$i], $start_res[$i]);
+    $residues{$resid} = 1;
+    $resid = make_residue_id($end_id[$i], $end_res[$i]);
+    $residues{$resid} = 1;
+  }
+
+  if ($user_pdb_name && ($user_pdb_name ne ""))  {
+    while (<$user_pdb_name>) {
+      if (/^ATOM.................(.)(....)/) {
+        my $resid = make_residue_id($1, $2);
+        if (defined($residues{$resid})) {
+          delete $residues{$resid};
+        }
+      }
+      $file_contents .= $_;
+    }
+  }
+
+  if (scalar(keys %residues) > 0) {
+    my @error = ("The following residues were not found in ATOM records in" .
+                 " the PDB file: ", keys(%residues),
+                 "Check that you specified the loop segments correctly, and" .
+                 " that you uploaded the correct PDB file.");
+    end_modloop(@error);
+  } else {
+    return $file_contents;
+  }
+}
+
