@@ -5,6 +5,24 @@ body {
   font-size:small;
 }
 
+.error {
+  text-align:center;
+  color:#AA0000;
+  font-size:medium;
+}
+
+.submit {
+  text-align:center;
+  color:#000066;
+  font-size:medium;
+}
+
+.submitinfo {
+  text-align:left;
+  color:#000066;
+  font-size:medium;
+}
+
 body.help {
   background: white;
   font-family: serif;

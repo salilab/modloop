@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/local/bin/perl -w
 
 ###############################################################
 #                                                             #
@@ -77,17 +77,11 @@ while ($loops*4+3 <= $#loop_data and $loop_data[$loops*4] ne "") {
       || (($end_res[$loops]-$start_res[$loops])<0)
       || ($start_res[$loops] eq "")
       || ($end_res[$loops] eq "")) {
-    print header(), start_html("MODLOOP ERROR"),
-          h2({-align=>'CENTER'},font({-color=>"#AA0000"},"ERROR!")), hr,
-          h4({-align=>'CENTER'},font({-color=>"#AA0000"},
-             "The loop selected is too long (>20 residues) or shorter than 1" .
-             " residue or not selected properly (syntax problem?)")),
-          h4({-align=>'CENTER'},font({-color=>"#AA0000"},
-             "starting position $start_res[$loops]:$start_id[$loops]," .
-             " ending position: $end_res[$loops]:$end_id[$loops]")),
-          h4({-align=>'CENTER'},font({-color=>"#AA0000"},
-             "Please correct! Try again!")),
-          end_html(); exit;       
+    quit_with_error("The loop selected is too long (>20 residues) or " .
+                    "shorter than 1 residue or not selected properly " .
+                    "(syntax problem?)",
+                    "starting position $start_res[$loops]:$start_id[$loops]," .
+                    " ending position: $end_res[$loops]:$end_id[$loops]");
   }
   $loops++;
 }
@@ -199,63 +193,52 @@ close(NEWCONF);
 ###############################################
 ## write subject details into a file and pop up an exit page
 
-print header(), start_html("MODLOOP SUBMITTED"),
-      h2({-align=>'CENTER'},font({-color=>"#AA0000"},"Dear User")),
+print header(), mystart_html("MODLOOP SUBMITTED"),
+      h1({-class=>'submit'}, "Dear User"),
       hr,
-      h4({-align=>'CENTER'},font({-color=>"#AA0000"},
-         "Your job has been submitted to the server! Your process " .
-         "ID is $jobid")),
-      h4({-align=>'LEFT'},font({-color=>"#AA0000"},
-         "The following loop segment(s) will be optimized: $loopout in " .
-         "protein: >$user_name< ")),
-      h4({-align=>'LEFT'},font({-color=>"#AA0000"},
-         "using the method of Fiser et al. (Prot. Sci. (2000) 9,1753-1773")),
-      h4({-align=>'LEFT'},font({-color=>"#AA0000"},
-         "You will receive the protein coordinate file with the optimized " .
-         "loop region by e-mail, to the adress: $email")),
-      h4({-align=>'LEFT'},font({-color=>"#AA0000"},
-         "The estimated execution time is ~90 min, depending on the load..")),
-      h4({-align=>'LEFT'},font({-color=>"#AA0000"},
-         "If you experience a problem or you do not receive the results " .
-         "for more than  12 hours, please contact modloop\@salilab.org")),
-      h4({-align=>'CENTER'},font({-color=>"#AA0000"},
-         "Thank you for using our server and good luck in your research!")),
-      h4({-align=>'RIGHT'},font({-color=>"#AA0000"},"Andras Fiser")),
+      p({-class=>'submit'}, "Your job has been submitted to the server! " .
+        "Your process ID is $jobid"),
+      p({-class=>'submitinfo'},
+        "The following loop segment(s) will be optimized: $loopout in " .
+        "protein: >$user_name< "),
+      p({-class=>'submitinfo'},
+        "using the method of Fiser et al. (Prot. Sci. (2000) 9,1753-1773"),
+      p({-class=>'submitinfo'},
+        "You will receive the protein coordinate file with the optimized " .
+        "loop region by e-mail, to the adress: $email"),
+      p({-class=>'submitinfo'},
+        "The estimated execution time is ~90 min, depending on the load.."),
+      p({-class=>'submitinfo'},
+        "If you experience a problem or you do not receive the results " .
+        "for more than  12 hours, please contact modloop\@salilab.org"),
+      p({-class=>'submit'},
+        "Thank you for using our server and good luck in your research!"),
+      p({-class=>'submit'}, "Andras Fiser"),
       hr,
       end_html();
 
-sub end_modloop {
-
-	my @message=@_;
-	my $errortable;
-	print header,start_html("MODLOOP ERROR");
-
-	$errortable=table({-border=>0, -width=>"70%", -bgcolor=>"white", -align=>"center"},
-                Tr({-cellspacing=>0, -cellpadding=>0},
-                        td({-class=>"redtxt", -align=>"left"},b("MODLOOP Error"))),
-                Tr({-cellspacing=>0, -cellpadding=>0},
-                        td({-class=>"redtxt", -align=>"left"},b("An error occured during your request:"))),
-                Tr({-cellspacing=>0, -cellpadding=>0},
-                        td({-class=>"smallindented", -align=>"left"},br,b(join(br,@message)),br,br)),
-                Tr({-cellspacing=>0, -cellpadding=>0},
-                        td({-class=>"redtxt",-align=>"left"},
-			b("Please click on your browser's \"BACK\" button, and correct the problem.",br))));
-
-	print $errortable;
-	print end_html;
-	exit;
-
-}
-
 # Quit with an error message
 sub quit_with_error {
-  my ($err) = @_;
-  print header(), start_html("MODLOOP ERROR"),
-        h2({-align=>'CENTER'},font({-color=>"#AA0000"},"ERROR!")), hr,
-        h4({-align=>'CENTER'},font({-color=>"#AA0000"}, $err)),
-        h4({-align=>'CENTER'},font({-color=>"#AA0000"},"Try again!")),
-        end_html();
+  my @message = @_;
+
+  print header(), mystart_html("MODLOOP ERROR"),
+        h1({-class=>'error'}, "MODLOOP Error"), hr;
+
+  print p({-class=>'error'}, "An error occured during your request:");
+
+  print p({-class=>'error'}, join(br, @message));
+        
+  print p({-class=>'error'}, "Please click on your browser's \"BACK\" " .
+          "button, and correct the problem.");
+
+  print end_html();
   exit;
+}
+
+# HTML header
+sub mystart_html {
+  my ($title) = @_;
+  return start_html(-title=>$title, -style=>{-src=>"../modloop.css"});
 }
 
 # Check Modeller license key
@@ -287,13 +270,13 @@ sub check_email {
   my ($email) = @_;
 
   if (!$email || $email eq "") {
-    end_modloop("Please provide an e-mail address, because results will " .
-                "be sent by email!");
+    quit_with_error("Please provide an e-mail address, because results will " .
+                    "be sent by email!");
   }
 
   unless ($email =~ /^[\w.+-]+\@[\w.+-]+$/) {
-    end_modloop("Your email address contains special characters. " .
-                "Please enter a regular email address! ");
+    quit_with_error("Your email address contains special characters. " .
+                    "Please enter a regular email address! ");
   }
 }
 
@@ -304,9 +287,9 @@ sub check_users {
   my @oldruns = (glob("$tmp/modloop_*"), glob("$tmp/../running/*/sge-jobid"));
 
   if (scalar(@oldruns) >= $number_of_users ) {
-    end_modloop("The server queue has reached its maximum number of " .
-                "$number_of_users  simultaneous users. Please try later on!",
-                "Sorry!");
+    quit_with_error("The server queue has reached its maximum number of " .
+                    "$number_of_users  simultaneous users. " .
+                    "Please try later on!", "Sorry!");
   }
 }
 
@@ -348,7 +331,7 @@ sub read_pdb_file {
                  " the PDB file: ", keys(%residues),
                  "Check that you specified the loop segments correctly, and" .
                  " that you uploaded the correct PDB file.");
-    end_modloop(@error);
+    quit_with_error(@error);
   } else {
     return $file_contents;
   }
