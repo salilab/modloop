@@ -37,7 +37,6 @@ sub generate_files {
   my ($iteration, $email, $jobid, $rundir) = @_;
 
   ### generate Modeller input files
-  my $infile="";
   for (my $i = 1; $i <= $iteration; $i++) {
     #get a random number here
     my $random_seed = int(rand(1)*48000) - 49000;
@@ -52,7 +51,6 @@ sub generate_files {
     }
     close(INFILE);
     close(OUTFILE);
-    $infile .= " $i.py";  # collect names for codine
   }
 
   # generate codine script
@@ -62,7 +60,6 @@ sub generate_files {
   open(OLDCONF, $oldcodine) or die "Cannot open $oldcodine: $!";
   while(<OLDCONF>) {
     s/iteration/$iteration/g;
-    s/INFILES/$infile/g;
     s/DIR/$rundir/g;
     print NEWCONF;
   }

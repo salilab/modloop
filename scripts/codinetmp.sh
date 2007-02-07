@@ -1,5 +1,5 @@
-#!/bin/csh
-#$ -S /bin/csh
+#!/bin/sh
+#$ -S /bin/sh
 #$ -cwd
 #$ -o output.error
 #$ -e output.error
@@ -14,12 +14,10 @@
 #####node limitation
 #####$ -l modloop
 
-set tasks=( INFILES )
-
-set input=$tasks[$SGE_TASK_ID]
+input="${SGE_TASK_ID}.py"
 
 # Create local scratch directory
-set tmpdir="/scratch/modloop/$JOB_ID/$SGE_TASK_ID"
+tmpdir="/scratch/modloop/$JOB_ID/$SGE_TASK_ID"
 mkdir -p $tmpdir
 cd $tmpdir
 
