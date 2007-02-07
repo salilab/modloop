@@ -63,31 +63,34 @@ my $total_res=0;
 my (@start_res, @start_id, @end_res, @end_id);
 my $loops = 0;
 while ($loops*4+3 <= $#loop_data and $loop_data[$loops*4] ne "") {
-    $start_res[$loops]=$loop_data[$loops*4];
-    $start_id[$loops]=$loop_data[$loops*4+1];
-    $end_res[$loops]=$loop_data[$loops*4+2];
-    $end_id[$loops]=$loop_data[$loops*4+3];
-    #all the selected residues
-    $total_res += ($end_res[$loops] - $start_res[$loops] + 1);
+  $start_res[$loops]=$loop_data[$loops*4];
+  $start_id[$loops]=$loop_data[$loops*4+1];
+  $end_res[$loops]=$loop_data[$loops*4+2];
+  $end_id[$loops]=$loop_data[$loops*4+3];
+  #all the selected residues
+  $total_res += ($end_res[$loops] - $start_res[$loops] + 1);
 
-    ################################
-    # too long loops rejected
-    if ((($end_res[$loops]-$start_res[$loops]) > 20)
-        || ($start_id[$loops] ne $end_id[$loops])
-        || (($end_res[$loops]-$start_res[$loops])<0)
-        || ($start_res[$loops] eq "")
-        || ($end_res[$loops] eq ""))
-      {
-       print header(), start_html("MODLOOP ERROR"),
-       h2({-align=>'CENTER'},font({-color=>"#AA0000"},"ERROR!")),
-       hr,
-       h4({-align=>'CENTER'},font({-color=>"#AA0000"},"The loop selected is too long (>20 residues) or shorter than 1 residue or not selected properly (syntax problem?)")),
-       h4({-align=>'CENTER'},font({-color=>"#AA0000"},"starting position $start_res[$loops]:$start_id[$loops], ending position: $end_res[$loops]:$end_id[$loops]")),
-       h4({-align=>'CENTER'},font({-color=>"#AA0000"},"Please correct! Try again!")),
-       end_html(); exit;       
-     }
-    $loops++;
+  ################################
+  # too long loops rejected
+  if ((($end_res[$loops]-$start_res[$loops]) > 20)
+      || ($start_id[$loops] ne $end_id[$loops])
+      || (($end_res[$loops]-$start_res[$loops])<0)
+      || ($start_res[$loops] eq "")
+      || ($end_res[$loops] eq "")) {
+    print header(), start_html("MODLOOP ERROR"),
+          h2({-align=>'CENTER'},font({-color=>"#AA0000"},"ERROR!")), hr,
+          h4({-align=>'CENTER'},font({-color=>"#AA0000"},
+             "The loop selected is too long (>20 residues) or shorter than 1" .
+             " residue or not selected properly (syntax problem?)")),
+          h4({-align=>'CENTER'},font({-color=>"#AA0000"},
+             "starting position $start_res[$loops]:$start_id[$loops]," .
+             " ending position: $end_res[$loops]:$end_id[$loops]")),
+          h4({-align=>'CENTER'},font({-color=>"#AA0000"},
+             "Please correct! Try again!")),
+          end_html(); exit;       
   }
+  $loops++;
+}
 
 
 ################################
@@ -157,64 +160,69 @@ close(OUT);
 #################################
 ### generate Modeller input file 
 
-  my $oldconfig = "../scripts/looptmp.py";
-  my $newconf = "$tmp/loop-$jobid.py";
-  open(NEWCONF, ">$newconf") or die "Cannot open $newconf: $!";
-  open(OLDCONF, $oldconfig) or die "Cannot open $oldconfig: $!";
-  while(my $line =  <OLDCONF> ) {
-    $line =~ s/USER_NAME/$user_name/g;
-    $line =~ s/USER_PDB/pdb-$jobid.pdb/g;
-    if ($line =~ /RESIDUE_RANGE/) {
-      for (my $j = 0; $j < $loops; $j++) {
-        print NEWCONF "          self.residue_range(" .
-                      "'$start_res[$j]:$start_id[$j]', " .
-                      "'$end_res[$j]:$end_id[$j]'),\n";
-      }
-    } else {
-      print NEWCONF $line;
+my $oldconfig = "../scripts/looptmp.py";
+my $newconf = "$tmp/loop-$jobid.py";
+open(NEWCONF, ">$newconf") or die "Cannot open $newconf: $!";
+open(OLDCONF, $oldconfig) or die "Cannot open $oldconfig: $!";
+while(my $line =  <OLDCONF> ) {
+  $line =~ s/USER_NAME/$user_name/g;
+  $line =~ s/USER_PDB/pdb-$jobid.pdb/g;
+  if ($line =~ /RESIDUE_RANGE/) {
+    for (my $j = 0; $j < $loops; $j++) {
+      print NEWCONF "          self.residue_range(" .
+                    "'$start_res[$j]:$start_id[$j]', " .
+                    "'$end_res[$j]:$end_id[$j]'),\n";
     }
+  } else {
+    print NEWCONF $line;
   }
-  close(OLDCONF);
-  close(NEWCONF);
+}
+close(OLDCONF);
+close(NEWCONF);
 
 #################################
 # generate  pdb header
-  my $oldtext="toptext.tex";
-  open(NEWCONF, ">$tmp/toptext-$jobid.tex") or die "Cannot open: $!";
-  open(OLDCONF, $oldtext) or die "Cannot open $oldtext: $!";
-  while(my $line =  <OLDCONF> ) 
-    {
-    $line =~ s/USER_NAME/$user_name/g;
-    $line =~ s/USER_PDB/pdb-$jobid.pdb/g;
+my $oldtext="toptext.tex";
+open(NEWCONF, ">$tmp/toptext-$jobid.tex") or die "Cannot open: $!";
+open(OLDCONF, $oldtext) or die "Cannot open $oldtext: $!";
+while(my $line =  <OLDCONF>) {
+  $line =~ s/USER_NAME/$user_name/g;
+  $line =~ s/USER_PDB/pdb-$jobid.pdb/g;
     
-     $line =~ s/LOOP_LIST/$loopout/g;
-     $line =~ s/iteration/$iteration/g;
-     print NEWCONF $line;
-    }
-  close(OLDCONF);
-  close(NEWCONF);
+  $line =~ s/LOOP_LIST/$loopout/g;
+  $line =~ s/iteration/$iteration/g;
+  print NEWCONF $line;
+}
+close(OLDCONF);
+close(NEWCONF);
 
 ###############################################
 ## write subject details into a file and pop up an exit page
 
-### good bye
-
 print header(), start_html("MODLOOP SUBMITTED"),
-         h2({-align=>'CENTER'},font({-color=>"#AA0000"},"Dear User")),
-       hr,
-         h4({-align=>'CENTER'},font({-color=>"#AA0000"},"Your job has been submitted to the server! Your process ID is $jobid")),
-         h4({-align=>'LEFT'},font({-color=>"#AA0000"},"The following loop segment(s) will be optimized: $loopout in protein: >$user_name< ")),
-         h4({-align=>'LEFT'},font({-color=>"#AA0000"},"using the method of Fiser et al. (Prot. Sci. (2000) 9,1753-1773")),
-         h4({-align=>'LEFT'},font({-color=>"#AA0000"},"You will receive the protein coordinate file with the optimized loop region by e-mail, to the adress: $email")),
-        h4({-align=>'LEFT'},font({-color=>"#AA0000"},"The estimated execution time is ~90 min, depending on the load..")),
-        h4({-align=>'LEFT'},font({-color=>"#AA0000"},"If you experience a problem or you do not receive the results for more than  12 hours, please contact modloop\@salilab.org")),
-h4({-align=>'CENTER'},font({-color=>"#AA0000"},"Thank you for using our server and good luck in your research!")),
-    h4({-align=>'RIGHT'},font({-color=>"#AA0000"},"Andras Fiser")),
-	hr,
-         end_html(); exit;  
-
-
-
+      h2({-align=>'CENTER'},font({-color=>"#AA0000"},"Dear User")),
+      hr,
+      h4({-align=>'CENTER'},font({-color=>"#AA0000"},
+         "Your job has been submitted to the server! Your process " .
+         "ID is $jobid")),
+      h4({-align=>'LEFT'},font({-color=>"#AA0000"},
+         "The following loop segment(s) will be optimized: $loopout in " .
+         "protein: >$user_name< ")),
+      h4({-align=>'LEFT'},font({-color=>"#AA0000"},
+         "using the method of Fiser et al. (Prot. Sci. (2000) 9,1753-1773")),
+      h4({-align=>'LEFT'},font({-color=>"#AA0000"},
+         "You will receive the protein coordinate file with the optimized " .
+         "loop region by e-mail, to the adress: $email")),
+      h4({-align=>'LEFT'},font({-color=>"#AA0000"},
+         "The estimated execution time is ~90 min, depending on the load..")),
+      h4({-align=>'LEFT'},font({-color=>"#AA0000"},
+         "If you experience a problem or you do not receive the results " .
+         "for more than  12 hours, please contact modloop\@salilab.org")),
+      h4({-align=>'CENTER'},font({-color=>"#AA0000"},
+         "Thank you for using our server and good luck in your research!")),
+      h4({-align=>'RIGHT'},font({-color=>"#AA0000"},"Andras Fiser")),
+      hr,
+      end_html();
 
 sub end_modloop {
 
@@ -345,4 +353,3 @@ sub read_pdb_file {
     return $file_contents;
   }
 }
-
