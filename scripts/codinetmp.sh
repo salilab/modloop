@@ -14,7 +14,7 @@
 #####node limitation
 #####$ -l modloop
 
-set tasks=( TOPFILES  )
+set tasks=( INFILES )
 
 set input=$tasks[$SGE_TASK_ID]
 
@@ -26,7 +26,7 @@ cd $tmpdir
 # Get input files
 cp DIR/$input DIR/pdb*AF*pdb .
 
-/diva1/home/modeller/mod7v7 $input
+/diva1/home/modeller/mod9v1 $input
 
 # Copy back outputs
 cp *.B* *.log DIR

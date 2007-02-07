@@ -62,7 +62,7 @@ sub generate_files {
   open(OLDCONF, $oldcodine) or die "Cannot open $oldcodine: $!";
   while(<OLDCONF>) {
     s/iteration/$iteration/g;
-    s/TOPFILES/$topfile/g;
+    s/INFILES/$topfile/g;
     s/DIR/$rundir/g;
     print NEWCONF;
   }
