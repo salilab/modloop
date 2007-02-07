@@ -45,7 +45,7 @@ sub generate_files {
     open(OUTFILE, "> $i.py")
         or die "Cannot open output: $!";
     while(<INFILE>) {
-      s/CODINE_RND/$random_seed/;
+      s/RANDOM_SEED/$random_seed/;
       s/item/$i/;
       print OUTFILE;
     }
@@ -53,11 +53,11 @@ sub generate_files {
     close(OUTFILE);
   }
 
-  # generate codine script
-  my $oldcodine = "$scriptsdir/codinetmp.sh";
-  my $newcodine = "codine-$jobid.sh";
-  open(NEWCONF, "> $newcodine") or die "Cannot open: $!";
-  open(OLDCONF, $oldcodine) or die "Cannot open $oldcodine: $!";
+  # generate SGE script
+  my $oldsge = "$scriptsdir/sge-template.sh";
+  my $newsge = "sge-$jobid.sh";
+  open(NEWCONF, "> $newsge") or die "Cannot open $newsge: $!";
+  open(OLDCONF, $oldsge) or die "Cannot open $oldsge: $!";
   while(<OLDCONF>) {
     s/iteration/$iteration/g;
     s/DIR/$rundir/g;
@@ -98,7 +98,7 @@ sub submit_jobs {
     generate_files($iteration, $email, $jobid, $jobdir);
 
     # SGE run
-    my $result = `${sge_bindir}/qsub codine-$jobid.sh`;
+    my $result = `${sge_bindir}/qsub sge-$jobid.sh`;
 
     if ($result =~ /Your job (\d+)\./) {
       my $sge_jobid = $1;

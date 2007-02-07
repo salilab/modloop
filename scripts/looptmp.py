@@ -5,7 +5,7 @@
 from modeller import *
 from modeller.automodel import *
 
-env = environ(rand_seed=CODINE_RND) # to get different starting models each time
+env = environ(rand_seed=RANDOM_SEED) # to get different starting models each time
 
 class myloop(loopmodel):
     def select_loop_atoms(self):
