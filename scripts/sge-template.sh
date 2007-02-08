@@ -9,7 +9,7 @@
 #$ -l scratch=1G
 #$ -r y
 #$ -N loop
-#$ -p -10
+#$ -p -4
 #$ -t 1-iteration
 #####node limitation
 #####$ -l modloop
