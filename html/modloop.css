@@ -5,6 +5,10 @@ body {
   font-size:small;
 }
 
+p.queue {
+  text-align:center;
+}
+
 .error {
   text-align:center;
   color:#AA0000;
