@@ -15,6 +15,7 @@
 #####$ -l modloop
 
 input="${SGE_TASK_ID}.py"
+output="${SGE_TASK_ID}.log"
 
 # Create local scratch directory
 tmpdir="/scratch/modloop/$JOB_ID/$SGE_TASK_ID"
@@ -24,9 +25,9 @@ cd $tmpdir
 # Get input files
 cp DIR/$input DIR/pdb*AF*pdb .
 
-/diva1/home/modeller/mod9v1 $input
+/diva1/home/modeller/mod9v1 - < $input >& $output
 
 # Copy back outputs
-cp *.B* *.log DIR
+cp *.B* $output DIR
 
 rm -rf $tmpdir

@@ -16,6 +16,7 @@ use File::Path;
 my $queuedir="@QUEUEDIR@";
 my $scriptsdir="@SCRIPTS@";
 my $rundir="$queuedir/../running";
+my $modloop_email="modloop\@salilab.org";
 
 # SGE setup
 $ENV{'SGE_ROOT'} = "/home/sge6";
@@ -182,10 +183,47 @@ sub finish_job {
   chomp $email;
   close EMAIL;
 
-  open(HEADER, "$job/toptext-$job.tex") or die "Cannot open header: $!";
-  open(PDB, $winner) or die "Cannot open PDB $winner: $!";
+  if ($winner eq "") {
+    # job failed for some reason
+    email_job_failure($email, $job);
+  } else {
+    email_job_results($email, $job, $winner);
+  }
+}
 
-  open(MAIL, "| /usr/bin/mail -t modloop\@salilab.org $email") or die "Cannot open pipe: $!";
+# Report a failed job by email
+sub email_job_failure {
+  my ($email, $job) = @_;
+
+  open(MAIL, "| /usr/bin/mail -t $modloop_email $email")
+      or die "Cannot open pipe: $!";
+  print MAIL "Subject: ModLoop job FAILED\n\n";
+  print MAIL "Your ModLoop job $job failed to produce any output models.\n";
+  print MAIL "This is usually caused by incorrect inputs (e.g. corrupt PDB\n";
+  print MAIL "file, incorrect loop selection).\n\n";
+  print MAIL "For reference, the MODELLER log is shown below. If the problem\n";
+  print MAIL "is not clear from this log (or if no log is shown), please\n";
+  print MAIL "contact us for further assistance.\n\n";
+  my @logs = glob("$job/*.log");
+  if (scalar(@logs) > 0) {
+    open(LOG, $logs[0]) or die "Cannot open $logs[0]: $!";
+    while(<LOG>) {
+      print MAIL;
+    }
+    close LOG;
+  }
+  close MAIL or die "Cannot close pipe: $!";
+}
+
+# Return top-scoring PDB by email
+sub email_job_results {
+  my ($email, $job, $winner) = @_;
+
+  open(HEADER, "$job/toptext-$job.tex") or die "Cannot open header: $!";
+  open(PDB, $winner) or die "Cannot open top-scoring PDB $winner: $!";
+
+  open(MAIL, "| /usr/bin/mail -t $modloop_email $email")
+      or die "Cannot open pipe: $!";
   print MAIL "Subject: ModLoop results\n\n";
   while(<HEADER>) {
     print MAIL;
