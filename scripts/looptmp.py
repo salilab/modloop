@@ -12,7 +12,10 @@ class myloop(loopmodel):
         res = (
 RESIDUE_RANGE
         )
-        return selection(res)
+        s = selection(res)
+        if len(s.only_no_topology()) > 0:
+            raise ModellerError, "some selected residues have no topology"
+        return s
 
 m = myloop(env, inimodel='USER_PDB',
            sequence='USER_NAME')
