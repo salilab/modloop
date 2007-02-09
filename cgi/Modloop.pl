@@ -199,7 +199,7 @@ print header(), mystart_html("MODLOOP SUBMITTED"),
       p({-class=>'submit'}, "Your job has been submitted to the server! " .
         "Your job ID is $jobid"),
       p({-class=>'submit'}, "(You can check on your job at the " .
-        "<a href="queue.pl">ModLoop queue status page</a>"),
+        "<a href=\"queue.pl\">ModLoop queue status page</a>)"),
       p({-class=>'submitinfo'},
         "The following loop segment(s) will be optimized: $loopout in " .
         "protein: >$user_name< "),
