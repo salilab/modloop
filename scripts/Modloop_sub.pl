@@ -201,6 +201,8 @@ sub email_job_failure {
   print MAIL "Your ModLoop job $job failed to produce any output models.\n";
   print MAIL "This is usually caused by incorrect inputs (e.g. corrupt PDB\n";
   print MAIL "file, incorrect loop selection).\n\n";
+  print MAIL "For a disucssion of some common input errors, please see the\n";
+  print MAIL "help page at http://salilab.org/modloop/help.html\n\n";
   print MAIL "For reference, the MODELLER log is shown below. If the problem\n";
   print MAIL "is not clear from this log (or if no log is shown), please\n";
   print MAIL "contact us for further assistance.\n\n";
