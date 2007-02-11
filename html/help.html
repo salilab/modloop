@@ -15,10 +15,11 @@
 <li>
 <a id="file"><b>Upload your file</b></a>
 
-<p>The uploaded coordinate file must be in PDB format. The loop region to be
-modelled must be included in the coordinate file, even if only with dummy
-coordinates because topological connections are derived from the PDB file
-(there is no other input required.)</p></li>
+<p>The uploaded coordinate file must be a valid PDB format file. The loop region
+to be modelled must be included in the coordinate file, since the amino acid
+sequence and initial loop energy are derived from the PDB file. (You can give
+the loop atoms dummy coordinates, but each atom must have different coordinates,
+or you will get a 'Central bond too short' error from Modeller.)</p></li>
 
 <li>
 <a id="loop"><b>Select loop segment</b></a>
@@ -26,12 +27,15 @@ coordinates because topological connections are derived from the PDB file
 <p>The starting and ending residue positions and chain identifiers (if any)
 should be specified here, separated by ":". One can specify several loop
 segments, but the total number of residues involved in the loops must not
-exceed 14. Please use the following syntax:</p>
+exceed 14. Only regular amino acids can be selected for loop modeling (i.e.
+no non-standard residues such as ligands, DNA strands, etc.) although the
+non-loop regions of your PDB <i>can</i> contain non-standard residues.
+Please use the following syntax:</p>
 
 <p>Example 1. one loop between residues 12 and 18 in chain B:</p>
 <h2>12:B:18:B:</h2>
 
-<p>Example 2.  one loop between residues 15 and 22, no chain identifier,
+<p>Example 2. one loop between residues 15 and 22, no chain identifier,
 another loop between residues 98 and 103 in chain B and one more residue, at
 position 66 in chain C to be selected:</p>
 
