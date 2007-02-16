@@ -33,28 +33,10 @@ my @running = glob("*AF*");
 check_finished_jobs($rundir, @running);
 
 
-# Generate Modeller input and SGE script
-sub generate_files {
+# Generate SGE script
+sub generate_script {
   my ($iteration, $email, $jobid, $rundir) = @_;
 
-  ### generate Modeller input files
-  for (my $i = 1; $i <= $iteration; $i++) {
-    #get a random number here
-    my $random_seed = int(rand(1)*48000) - 49000;
-    open(INFILE, "loop-$jobid.py")
-        or die "Cannot open input: $!";
-    open(OUTFILE, "> $i.py")
-        or die "Cannot open output: $!";
-    while(<INFILE>) {
-      s/RANDOM_SEED/$random_seed/;
-      s/item/$i/;
-      print OUTFILE;
-    }
-    close(INFILE);
-    close(OUTFILE);
-  }
-
-  # generate SGE script
   my $oldsge = "$scriptsdir/sge-template.sh";
   my $newsge = "sge-$jobid.sh";
   open(NEWCONF, "> $newsge") or die "Cannot open $newsge: $!";
@@ -62,6 +44,7 @@ sub generate_files {
   while(<OLDCONF>) {
     s/iteration/$iteration/g;
     s/DIR/$rundir/g;
+    s/\@JOBID\@/$jobid/g;
     print NEWCONF;
   }
   close(OLDCONF);
@@ -95,8 +78,8 @@ sub submit_jobs {
     }
     chdir($jobdir) or die "Cannot change to $jobdir: $!";
 
-    # Make TOP scripts and SGE submission script
-    generate_files($iteration, $email, $jobid, $jobdir);
+    # Make SGE submission script
+    generate_script($iteration, $email, $jobid, $jobdir);
 
     # SGE run
     my $result = `${sge_bindir}/qsub sge-$jobid.sh`;

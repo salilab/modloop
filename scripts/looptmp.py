@@ -1,11 +1,14 @@
-# Input: none, edit this file
-# Output: generated models in *.M* files, calculated energies in *.E* files
+# Input: ${SGE_TASK_ID}
+# Output: generated models in *.B* files, calculated energies in *.E* files
 #
 
 from modeller import *
 from modeller.automodel import *
+import sys
 
-env = environ(rand_seed=RANDOM_SEED) # to get different starting models each time
+# to get different starting models for each task
+taskid = int(sys.argv[1])
+env = environ(rand_seed=-1000-taskid)
 
 class myloop(loopmodel):
     def select_loop_atoms(self):
@@ -20,6 +23,6 @@ RESIDUE_RANGE
 m = myloop(env, inimodel='USER_PDB',
            sequence='USER_NAME')
 m.loop.md_level = refine.slow
-m.loop.starting_model = m.loop.ending_model = item
+m.loop.starting_model = m.loop.ending_model = taskid
 
 m.make()
