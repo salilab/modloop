@@ -27,7 +27,13 @@ cp DIR/$input DIR/pdb*AF*pdb .
 
 /diva1/home/modeller/mod9v1 - ${SGE_TASK_ID} < $input >& $output
 
-# Copy back outputs
-cp *.B* $output DIR
+# Copy back PDB
+cp *.B* DIR
+
+# Copy back log file (first 5000 lines only, and only for some tasks, in
+# case a huge log file was produced):
+if [ "${SGE_TASK_ID}" -lt 6 ]; then
+  head -5000 $output > DIR/$output
+fi
 
 rm -rf $tmpdir
