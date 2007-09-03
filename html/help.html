@@ -16,7 +16,7 @@
 <a id="file"><b>Upload your file</b></a>
 
 <p>The uploaded coordinate file must be a valid PDB format file. The loop region
-to be modelled must be included in the coordinate file, since the amino acid
+to be modeled must be included in the coordinate file, since the amino acid
 sequence and initial loop energy are derived from the PDB file. (You can give
 the loop atoms dummy coordinates, but each atom must have different coordinates,
 or you will get a 'Central bond too short' error from Modeller.)</p></li>
@@ -71,6 +71,22 @@ server will return a MODELLER key. You need to enter this license key here in
 order to use this server.</p>
 </li>
 
+</ul>
+
+<hr>
+
+<h2><a id="errors">Common errors</a></h2>
+
+<ul>
+<li><b>'Central bond too short'</b>: this is usually caused by having two or
+more atoms in your input PDB file with the same coordinates. (Tip: if you
+don't know the original coordinates of your loop, specify dummy
+coordinates, but don't put every atom at (0,0,0).)<p></li>
+
+<li><b>'some selected residues have no topology'</b>: the loop modeling
+protocol is only defined on standard amino acids. Thus, you can't select
+residues for modeling which have no defined MODELLER topology, such as
+DNA/RNA, metal ions, or ligands.<p></li>
 </ul>
 
 </body>
