@@ -16,4 +16,5 @@ install: $(SUBDIRS)
 	@echo "the ${QUEUEDIR} directory is owned by the nobody group."
 
 ${SUBDIRS}:
+	@test `whoami` = "modloop" || (echo "Must run as the 'modloop' user"; exit 1)
 	${MAKE} -C $@
