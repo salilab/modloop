@@ -20,6 +20,7 @@ my $modloop_email="modloop\@salilab.org";
 
 # SGE setup
 $ENV{'SGE_ROOT'} = "/home/sge61";
+$ENV{'SGE_CELL'} = "sali";
 my $sge_bindir = "/home/sge61/bin/sol-sparc64";
 
 # Submit any new jobs
