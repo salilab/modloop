@@ -85,7 +85,7 @@ sub submit_jobs {
     # SGE run
     my $result = `${sge_bindir}/qsub sge-$jobid.sh`;
 
-    if ($result =~ /Your job (\d+)\./) {
+    if ($result =~ /Your job\-array (\d+)\./) {
       my $sge_jobid = $1;
       open(OUT, "> sge-jobid") or die "Cannot write job id: $!";
       print OUT "$sge_jobid\n";
