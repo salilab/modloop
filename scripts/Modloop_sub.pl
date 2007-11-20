@@ -19,8 +19,8 @@ my $rundir="$queuedir/../running";
 my $modloop_email="modloop\@salilab.org";
 
 # SGE setup
-$ENV{'SGE_ROOT'} = "/home/sge6";
-my $sge_bindir = "/home/sge6/bin/sol-sparc64";
+$ENV{'SGE_ROOT'} = "/home/sge61";
+my $sge_bindir = "/home/sge61/bin/sol-sparc64";
 
 # Submit any new jobs
 chdir($queuedir);
