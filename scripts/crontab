@@ -1,2 +1,0 @@
-# modloop daemon
-0,15,30,45 * * * * /diva1/home/modloop/scripts/Modloop_sub.pl

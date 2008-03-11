@@ -4,17 +4,15 @@ SUBDIRS=html cgi scripts
 .PHONY: install ${SUBDIRS}
 
 install: $(SUBDIRS)
-	mkdir -p ${QUEUEDIR} ${RUNDIR}
+	mkdir -p ${QUEUEDIR}
+	chown modloop.apache ${QUEUEDIR}
 	chmod 775 ${QUEUEDIR}
+	@echo "ScriptAlias /modloop/cgi ${CGI}" > /etc/httpd/conf.d/modloop.conf
+	@echo "Alias /modloop ${HTML}" >> /etc/httpd/conf.d/modloop.conf
 	@echo
-	@echo "To finalize installation, add"
-	@echo
-	@echo "ScriptAlias modloop/cgi ${CGI}
-	@echo "Alias modloop ${HTML}"
-	@echo
-	@echo "to the Apache configuration (on alto), and make sure that"
-	@echo "the ${QUEUEDIR} directory is owned by the nobody group."
+	@echo "** Note: may need to restart httpd to pick up modloop alias."
+	@echo "** Also, make sure that ${RUNDIR} exists and is"
+	@echo "** writeable by the modloop user."
 
 ${SUBDIRS}:
-	@test `whoami` = "modloop" || (echo "Must run as the 'modloop' user"; exit 1)
 	${MAKE} -C $@

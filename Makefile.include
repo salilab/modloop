@@ -1,5 +1,5 @@
-TOP=/diva1/home/modloop
-QUEUEDIR=/alto2/home/modloop_runs/queue
+TOP=/modbase5/home/modloop
+QUEUEDIR=${TOP}/queue
 RUNDIR=/alto2/home/modloop_runs/running
 
 HTML=${TOP}/html

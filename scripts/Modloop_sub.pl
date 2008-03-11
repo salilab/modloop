@@ -15,13 +15,13 @@ use File::Path;
 
 my $queuedir="@QUEUEDIR@";
 my $scriptsdir="@SCRIPTS@";
-my $rundir="$queuedir/../running";
+my $rundir="@RUNDIR@";
 my $modloop_email="modloop\@salilab.org";
 
 # SGE setup
 $ENV{'SGE_ROOT'} = "/home/sge61";
 $ENV{'SGE_CELL'} = "sali";
-my $sge_bindir = "/home/sge61/bin/sol-sparc64";
+my $sge_bindir = "/home/sge61/bin/lx24-amd64";
 
 # Submit any new jobs
 chdir($queuedir);
@@ -179,9 +179,8 @@ sub finish_job {
 sub email_job_failure {
   my ($email, $job) = @_;
 
-  open(MAIL, "| /usr/bin/mail -t $modloop_email $email")
+  open(MAIL, "| /bin/mail -s 'ModLoop job FAILED' $modloop_email $email")
       or die "Cannot open pipe: $!";
-  print MAIL "Subject: ModLoop job FAILED\n\n";
   print MAIL "Your ModLoop job $job failed to produce any output models.\n";
   print MAIL "This is usually caused by incorrect inputs (e.g. corrupt PDB\n";
   print MAIL "file, incorrect loop selection).\n\n";
@@ -208,9 +207,8 @@ sub email_job_results {
   open(HEADER, "$job/toptext-$job.tex") or die "Cannot open header: $!";
   open(PDB, $winner) or die "Cannot open top-scoring PDB $winner: $!";
 
-  open(MAIL, "| /usr/bin/mail -t $modloop_email $email")
+  open(MAIL, "| /bin/mail -s 'ModLoop results' $modloop_email $email")
       or die "Cannot open pipe: $!";
-  print MAIL "Subject: ModLoop results\n\n";
   while(<HEADER>) {
     print MAIL;
   }

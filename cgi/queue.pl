@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl -w
+#!/usr/bin/perl -w
 
 # Display status of the ModLoop queue
 
@@ -11,10 +11,11 @@ use CGI::Carp;
 
 # Substituted in at install time by Makefile:
 my $queuedir="@QUEUEDIR@";
+my $rundir="@RUNDIR@";
 
 my $queued = get_queued(glob("$queuedir/modloop_*"));
 my ($running, $gridqueue, $finished, $submitting) =
-    get_running(glob("$queuedir/../running/*"));
+    get_running(glob("$rundir/*"));
 
 print header();
 print start_html(-title=>"ModLoop queue", -style=>{-src=>"../modloop.css"});
