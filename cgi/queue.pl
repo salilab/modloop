@@ -12,10 +12,11 @@ use CGI::Carp;
 # Substituted in at install time by Makefile:
 my $queuedir="@QUEUEDIR@";
 my $rundir="@RUNDIR@";
+my $finisheddir="@FINISHEDDIR@";
 
 my $queued = get_queued(glob("$queuedir/modloop_*"));
-my ($running, $gridqueue, $finished, $submitting) =
-    get_running(glob("$rundir/*"));
+my ($running, $gridqueue, $submitting) = get_running(glob("$rundir/*"));
+my $finished = get_finished(glob("$finisheddir/*"));
 
 print header();
 print start_html(-title=>"ModLoop queue", -style=>{-src=>"../modloop.css"});
@@ -62,7 +63,7 @@ sub get_queued {
 # Get a list of all jobs submitted to SGE
 sub get_running {
   my @runningfiles = @_;
-  my (@running, @gridqueue, @finished, @submitting);
+  my (@running, @gridqueue, @submitting);
 
   foreach my $job (@runningfiles) {
     my $jobid = basename($job);
@@ -74,13 +75,23 @@ sub get_running {
       } else {
         push @gridqueue, $jobid;
       }
-    } elsif ($on_node) {
-      push @finished, $jobid;
-    } else {
+    } elsif (stat("$job/email")) {
       push @submitting, $jobid;
     }
   }
-  return (\@running, \@gridqueue, \@finished, \@submitting);
+  return (\@running, \@gridqueue, \@submitting);
+}
+
+# Get a list of all finished jobs
+sub get_finished {
+  my @finishedfiles = @_;
+
+  my @finished;
+  foreach my $job (@finishedfiles) {
+    my $jobid = basename($job);
+    push @finished, $jobid;
+  }
+  return \@finished;
 }
 
 # Print an informative key

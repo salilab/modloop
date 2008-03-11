@@ -16,6 +16,7 @@ use File::Path;
 my $queuedir="@QUEUEDIR@";
 my $scriptsdir="@SCRIPTS@";
 my $rundir="@RUNDIR@";
+my $finisheddir="@FINISHEDDIR@";
 my $modloop_email="modloop\@salilab.org";
 
 # SGE setup
@@ -29,10 +30,10 @@ my @queue = glob("modloop*");
 submit_jobs($queuedir, $rundir, @queue);
 
 # Check for finished jobs
-chdir($rundir);
-my @running = glob("*AF*");
-check_finished_jobs($rundir, @running);
+check_finished_jobs($rundir, $finisheddir);
 
+# Expire old finished jobs
+expire_jobs($finisheddir);
 
 # Generate SGE script
 sub generate_script {
@@ -105,9 +106,11 @@ sub submit_jobs {
 
 # Check for any finished jobs
 sub check_finished_jobs {
-  my ($tmp, @running) = @_;
+  my ($rundir, $finisheddir) = @_;
+  chdir($rundir);
+  my @running = glob("*AF*");
   for my $job (@running) {
-    chdir($tmp);
+    chdir($rundir);
     my @statlst = stat("$job/sge-jobid");
     my $timenow = time();
     if (@statlst) {
@@ -117,18 +120,31 @@ sub check_finished_jobs {
       chomp $sge_jobid;
       my $status = `${sge_bindir}/qstat -j $sge_jobid 2>&1`;
       if ($status =~ /^Following jobs do not exist/) {
-        finish_job($job);
-        unlink("$job/sge-jobid") or die "Cannot delete sge-jobid: $!";
+        finish_job($job, $finisheddir);
+        unlink("$finisheddir/$job/sge-jobid") or die "Cannot delete sge-jobid: $!";
       } elsif ($timenow - $statlst[9] > 60*60*24*7) {
         # Complain about running jobs after 7 days
         print "ModLoop job $job still running...\n";
       }
-    } else {
-      @statlst = stat($job);
-      if (@statlst and $timenow - $statlst[9] > 60*60*24*15) {
-        # Delete finished job directories more than 15 days old
-        rmtree($job);
-      }
+    # If the directory is empty, just delete it:
+    } elsif (!rmdir($job)) {
+      print "ModLoop job $job has no SGE job ID, but is not in finished directory\n";
+    }
+  }
+}
+
+
+# Expire old jobs
+sub expire_jobs {
+  my ($finisheddir) = @_;
+  chdir($finisheddir);
+  my $timenow = time();
+  my @jobs = glob("*AF*");
+  for my $job (@jobs) {
+    my @statlst = stat($job);
+    if (@statlst and $timenow - $statlst[9] > 60*60*24*15) {
+      # Delete finished job directories more than 15 days old
+      rmtree($job);
     }
   }
 }
@@ -158,8 +174,19 @@ sub get_winner {
 }
 
 sub finish_job {
-  my ($job) = @_;
+  my ($job, $finisheddir) = @_;
 
+  # Move job data to finished directory
+  mkdir("$finisheddir/$job", 0755) or die "Cannot make finished directory $finisheddir/$job: $!";
+  my @files = glob("$job/*");
+  for my $file (@files) {
+    move($file, "$finisheddir/$job") or die "Cannot move $file to $finisheddir: $!";
+  }
+  # Note that this may fail if rundir is on NFS; we clean empty directories
+  # elsewhere
+  rmdir($job);
+
+  chdir($finisheddir);
   my $winner = get_winner($job);
 
   open(EMAIL, "$job/email") or die "Cannot open email: $!";
@@ -173,6 +200,9 @@ sub finish_job {
   } else {
     email_job_results($email, $job, $winner);
   }
+
+  # Compress PDB files to save space
+  # system("gzip $job/*.pdb");
 }
 
 # Report a failed job by email

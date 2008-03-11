@@ -4,8 +4,9 @@ SUBDIRS=html cgi scripts
 .PHONY: install ${SUBDIRS}
 
 install: $(SUBDIRS)
-	mkdir -p ${QUEUEDIR}
+	mkdir -p ${QUEUEDIR} ${FINISHEDDIR}
 	chown modloop.apache ${QUEUEDIR}
+	chown modloop ${FINISHEDDIR}
 	chmod 775 ${QUEUEDIR}
 	@echo "ScriptAlias /modloop/cgi ${CGI}" > /etc/httpd/conf.d/modloop.conf
 	@echo "Alias /modloop ${HTML}" >> /etc/httpd/conf.d/modloop.conf

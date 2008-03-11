@@ -1,6 +1,7 @@
 TOP=/modbase5/home/modloop
 QUEUEDIR=${TOP}/queue
 RUNDIR=/alto2/home/modloop_runs/running
+FINISHEDDIR=${TOP}/finished
 
 HTML=${TOP}/html
 CGI=${TOP}/cgi
