@@ -183,6 +183,7 @@ while(my $line =  <OLDCONF>) {
   $line =~ s/USER_PDB/pdb-$jobid.pdb/g;
     
   $line =~ s/LOOP_LIST/$loopout/g;
+  $line =~ s/JOB_ID/$jobid/g;
   $line =~ s/iteration/$iteration/g;
   print NEWCONF $line;
 }
