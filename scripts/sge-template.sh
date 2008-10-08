@@ -6,7 +6,7 @@
 #$ -j y
 #####$ -l cpu600
 #$ -l i386=true
-#$ -l scratch=1G
+#$ -l scratch=1G -l netappsali=1G
 #$ -r y
 #$ -N loop
 #$ -p -4
