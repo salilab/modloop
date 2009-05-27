@@ -4,15 +4,11 @@
 #$ -o output.error
 #$ -e output.error
 #$ -j y
-#####$ -l cpu600
-#$ -l i386=true
 #$ -l scratch=1G -l netappsali=1G
 #$ -r y
 #$ -N loop
 #$ -p -4
 #$ -t 1-iteration
-#####node limitation
-#####$ -l modloop
 
 input="loop-@JOBID@.py"
 output="${SGE_TASK_ID}.log"
