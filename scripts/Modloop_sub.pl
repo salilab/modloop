@@ -19,10 +19,17 @@ my $rundir="@RUNDIR@";
 my $finisheddir="@FINISHEDDIR@";
 my $modloop_email="modloop\@salilab.org";
 
-# SGE setup
+# SGE setup for Sali cluster
 $ENV{'SGE_ROOT'} = "/home/sge61";
 $ENV{'SGE_CELL'} = "sali";
 my $sge_bindir = "/home/sge61/bin/lx24-amd64";
+
+# SGE setup for QB3 cluster
+#$ENV{'SGE_ROOT'} = "/ccpr1/sge6";
+#$ENV{'SGE_CELL'} = "qb3";
+#$ENV{'SGE_QMASTER_PORT'} = "536";
+#$ENV{'SGE_EXECD_PORT'} = "537";
+#my $sge_bindir = "/ccpr1/sge6/bin/lx24-amd64";
 
 # Submit any new jobs
 chdir($queuedir);
