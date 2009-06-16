@@ -21,7 +21,7 @@ cd $tmpdir
 # Get input files
 cp DIR/$input DIR/pdb*AF*pdb .
 
-/salilab/diva1/home/modeller/mod9v6 - ${SGE_TASK_ID} < $input >& $output
+/salilab/diva1/home/modeller/mod9v7 - ${SGE_TASK_ID} < $input >& $output
 
 # Copy back PDB
 cp *.B* DIR
