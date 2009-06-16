@@ -204,12 +204,12 @@ print header(), mystart_html("MODLOOP SUBMITTED"),
         "The following loop segment(s) will be optimized: $loopout in " .
         "protein: >$user_name< "),
       p({-class=>'submitinfo'},
-        "using the method of Fiser et al. (Prot. Sci. (2000) 9,1753-1773"),
+        "using the method of Fiser et al. (Prot. Sci. (2000) 9,1753-1773)"),
       p({-class=>'submitinfo'},
         "You will receive the protein coordinate file with the optimized " .
         "loop region by e-mail, to the adress: $email"),
       p({-class=>'submitinfo'},
-        "The estimated execution time is ~90 min, depending on the load.."),
+        "The estimated execution time is ~90 min, depending on the load."),
       p({-class=>'submitinfo'},
         "If you experience a problem or you do not receive the results " .
         "for more than  12 hours, please contact modloop\@salilab.org"),
