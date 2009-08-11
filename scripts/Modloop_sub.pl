@@ -51,8 +51,8 @@ sub generate_script {
   open(NEWCONF, "> $newsge") or die "Cannot open $newsge: $!";
   open(OLDCONF, $oldsge) or die "Cannot open $oldsge: $!";
   while(<OLDCONF>) {
-    s/iteration/$iteration/g;
-    s/DIR/$rundir/g;
+    s/\@ITERATION\@/$iteration/g;
+    s/\@RUNDIR\@/$rundir/g;
     s/\@JOBID\@/$jobid/g;
     print NEWCONF;
   }
