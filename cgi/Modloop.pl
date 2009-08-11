@@ -158,9 +158,9 @@ my $newconf = "$tmp/loop-$jobid.py";
 open(NEWCONF, ">$newconf") or die "Cannot open $newconf: $!";
 open(OLDCONF, $oldconfig) or die "Cannot open $oldconfig: $!";
 while(my $line =  <OLDCONF> ) {
-  $line =~ s/USER_NAME/$user_name/g;
-  $line =~ s/USER_PDB/pdb-$jobid.pdb/g;
-  if ($line =~ /RESIDUE_RANGE/) {
+  $line =~ s/\@USER_NAME\@/$user_name/g;
+  $line =~ s/\@USER_PDB\@/pdb-$jobid.pdb/g;
+  if ($line =~ /\@RESIDUE_RANGE\@/) {
     for (my $j = 0; $j < $loops; $j++) {
       print NEWCONF "          self.residue_range(" .
                     "'$start_res[$j]:$start_id[$j]', " .

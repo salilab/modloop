@@ -13,15 +13,15 @@ env = environ(rand_seed=-1000-taskid)
 class MyLoop(loopmodel):
     def select_loop_atoms(self):
         res = (
-RESIDUE_RANGE
+@RESIDUE_RANGE@
         )
         s = selection(res)
         if len(s.only_no_topology()) > 0:
             raise ModellerError, "some selected residues have no topology"
         return s
 
-m = MyLoop(env, inimodel='USER_PDB',
-           sequence='USER_NAME')
+m = MyLoop(env, inimodel='@USER_PDB@',
+           sequence='@USER_NAME@')
 m.loop.md_level = refine.slow
 m.loop.starting_model = m.loop.ending_model = taskid
 
