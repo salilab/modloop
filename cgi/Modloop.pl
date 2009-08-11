@@ -130,19 +130,6 @@ for (my $j=0;$j<$loops;$j++) {
   $loopout .= $start_res[$j].":".$start_id[$j]."-".$end_res[$j].":".$end_id[$j]." "; 
 }
 
-##################################
-### send a mail each time someone is using it
-
-open(OUTMAIL, "| /bin/mail -s 'ModLoop submission' modloop\@salilab.org")
-    or die "Cannot open pipe: $!";
-print OUTMAIL "This is the  LOOP SERVER speaking!!\n\n";
-print OUTMAIL "who is attempting to use modloop? (e-mail):>$email<\n";
-print OUTMAIL "protein code: >$user_name<\n";
-print OUTMAIL "loops: >$loopout<\n";
-print OUTMAIL "job id: >$jobid<\n";
-print OUTMAIL "\n\n...adios...\n";
-close (OUTMAIL);
-
 ###################################
 ### write pdb output
 
