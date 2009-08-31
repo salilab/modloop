@@ -1,6 +1,0 @@
-import saliweb.build
-
-env = saliweb.build.Environment('conf/webservice.conf')
-env.InstallBinaries()
-
-SConscript('python/modloop/SConscript', exports='env')
