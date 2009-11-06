@@ -1,8 +1,0 @@
-TOP=/modbase5/home/modloop
-QUEUEDIR=${TOP}/queue
-RUNDIR=/netapp/sali/modloop/running
-FINISHEDDIR=${TOP}/finished
-
-HTML=${TOP}/html
-CGI=${TOP}/cgi
-SCRIPTS=${TOP}/scripts

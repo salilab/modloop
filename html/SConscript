@@ -1,0 +1,3 @@
+Import('env')
+
+env.InstallHTML(['img/modloop.gif','img/pdf.gif'],'img')

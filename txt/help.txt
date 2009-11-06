@@ -1,13 +1,3 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
-             "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-<head>
-  <link href="modloop.css" rel="stylesheet" type="text/css">
-  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-  <title>ModLoop: Help/Glossary</title>
-</head>
-
-<body class="help">
 
 <h1>Help</h1>
 
@@ -33,16 +23,16 @@ non-loop regions of your PDB <i>can</i> contain non-standard residues.
 Please use the following syntax:</p>
 
 <p>Example 1. one loop between residues 12 and 18 in chain B:</p>
-<h2>12:B:18:B:</h2>
+<pre>12:B:18:B:</pre>
 
 <p>Example 2. one loop between residues 15 and 22, no chain identifier,
 another loop between residues 98 and 103 in chain B and one more residue, at
 position 66 in chain C to be selected:</p>
 
-<h2>15::22::<br>
-98:B:103:B:<br>
-66:C:66:C:<br>
-</h2>
+<pre>15::22::
+98:B:103:B:
+66:C:66:C:
+</pre>
 </li>
 
 <li>
@@ -55,8 +45,9 @@ model with the optimized loop.</p>
 <li>
 <a id="email"><b>E-mail address</b></a>
 
-<p>The e-mail address that is entered here is used by ModLoop to send the
-resulting coordinate file (with the optimzed loop included).</p>
+<p>If an e-mail address is entered here, it will be used to notify you
+when the job has completed. (Unlike older versions of ModLoop, the PDB file
+is not emailed directly to you, but can be downloaded from this web site.).</p>
 </li>
 
 <li>
@@ -73,21 +64,19 @@ order to use this server.</p>
 
 </ul>
 
-<hr>
+<hr />
 
-<h2><a id="errors">Common errors</a></h2>
+<h3><a id="errors">Common errors</a></h3>
 
 <ul>
 <li><b>'Central bond too short'</b>: this is usually caused by having two or
 more atoms in your input PDB file with the same coordinates. (Tip: if you
 don't know the original coordinates of your loop, specify dummy
-coordinates, but don't put every atom at (0,0,0).)<p></li>
+coordinates, but don't put every atom at (0,0,0).)</li>
 
 <li><b>'some selected residues have no topology'</b>: the loop modeling
 protocol is only defined on standard amino acids. Thus, you can't select
 residues for modeling which have no defined MODELLER topology, such as
-DNA/RNA, metal ions, or ligands.<p></li>
+DNA/RNA, metal ions, or ligands.</li>
 </ul>
 
-</body>
-</html>
