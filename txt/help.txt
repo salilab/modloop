@@ -7,7 +7,7 @@
 
 <p>If an e-mail address is entered here, it will be used to notify you
 when the job has completed. (Unlike older versions of ModLoop, the PDB file
-is not emailed directly to you, but can be downloaded from this web site.).</p>
+is not emailed directly to you, but can be downloaded from this web site.)</p>
 </li>
 
 <li>
