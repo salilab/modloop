@@ -3,6 +3,26 @@
 
 <ul> 
 <li>
+<a id="email"><b>E-mail address</b></a>
+
+<p>If an e-mail address is entered here, it will be used to notify you
+when the job has completed. (Unlike older versions of ModLoop, the PDB file
+is not emailed directly to you, but can be downloaded from this web site.).</p>
+</li>
+
+<li>
+<a id="modkey"><b>MODELLER key</b></a>
+
+<p>This server is freely available for academic users. The loop modeling
+module is implemented in the MODELLER program, therefore you need to register
+for a license of MODELLER. It can be done online and
+automatically by accessing the
+<a href="http://salilab.org/modeller/registration.html">MODELLER web site</a>.
+The web site will email you a MODELLER key. You need to enter this license key
+here in order to use this server.</p>
+</li>
+
+<li>
 <a id="file"><b>Upload your file</b></a>
 
 <p>The uploaded coordinate file must be a valid PDB format file. The loop region
@@ -38,28 +58,8 @@ position 66 in chain C to be selected:</p>
 <li>
 <a id="name"><b>Name of the model</b></a>
 
-<p>The model name entered here is used as a reference name for the protein
-model with the optimized loop.</p>
-</li>
-
-<li>
-<a id="email"><b>E-mail address</b></a>
-
-<p>If an e-mail address is entered here, it will be used to notify you
-when the job has completed. (Unlike older versions of ModLoop, the PDB file
-is not emailed directly to you, but can be downloaded from this web site.).</p>
-</li>
-
-<li>
-<a id="modkey"><b>MODELLER key</b></a>
-
-<p>This server is freely available for academic users. The loop modeling
-module is implemented in program MODELLER therefore you need to register for a
-valid license of MODELLER. It can be done on-line and
-automatically by accessing the
-<a href="http://salilab.org/modeller/registration.html">web site</a>. The
-server will return a MODELLER key. You need to enter this license key here in
-order to use this server.</p>
+<p>The name entered here is used to identify your job in the ModLoop
+system.</p>
 </li>
 
 </ul>
