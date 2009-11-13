@@ -123,6 +123,14 @@ sub get_submit_page {
 
     my @loop_data=split (/:/,$loops);
 
+    # Make sure correct number of colons were given
+    if (scalar(@loop_data) % 4 != 0) {
+        throw saliweb::frontend::InputValidationError(
+                  "Syntax error in loop selection: check to make sure you " .
+                  "have colons in the correct place (there should be a " .
+                  "multiple of 4 colons)");
+    }
+
     my $total_res=0;
     my (@start_res, @start_id, @end_res, @end_id);
     $loops = 0;
