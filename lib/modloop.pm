@@ -117,6 +117,78 @@ sub get_submit_page {
     check_loop_selection($loops);
     check_pdb_name($user_pdb_name);
 
+    my ($start_res, $start_id, $end_res, $end_id, $loop_data);
+    ($loops, $start_res, $start_id, $end_res, $end_id, $loop_data) =
+                parse_loop_selection($loops);
+
+
+    ###################################
+    ### read coordinates from file, and check loop residues
+
+    my $user_pdb = read_pdb_file($user_pdb_name, $loops, $start_res,
+                                 $start_id, $end_res, $end_id);
+
+    my $job = $self->make_job($user_name, $email);
+    my $jobdir = $job->directory;
+
+    ### write pdb input
+    my $pdb_input = "$jobdir/input.pdb";
+    open(INPDB, "> $pdb_input")
+       or throw saliweb::frontend::InternalError("Cannot open $pdb_input: $!");
+    print INPDB $user_pdb;
+    close INPDB
+       or throw saliweb::frontend::InternalError("Cannot close $pdb_input: $!");
+
+    ### write loop selection
+    my $loop_file = "$jobdir/loops.tsv";
+    open(OUT, "> $loop_file")
+       or throw saliweb::frontend::InternalError("Cannot open $loop_file: $!");
+    print OUT join("\t", @$loop_data);
+    close OUT
+       or throw saliweb::frontend::InternalError("Cannot close $loop_file: $!");
+
+    $job->submit();
+
+    ## write subject details into a file and pop up an exit page
+    my $loopout = "";
+    for (my $j=0;$j<$loops;$j++) {
+      $loopout .= $start_res->[$j].":".$start_id->[$j]."-".$end_res->[$j].
+                  ":".$end_id->[$j]." ";
+    }
+
+    my $return=
+      $q->h1("Job Submitted") .
+      $q->hr .
+      $q->p("Your job has been submitted to the server! " .
+            "Your job ID is " . $job->name . ".") .
+      $q->p("Results will be found at <a href=\"" .
+            $job->results_url . "\">this link</a>.");
+    if ($email) {
+        $return.=$q->p("You will be notified at $email when job results " .
+                       "are available.");
+    }
+
+    $return .=
+      $q->p("You can check on your job at the " .
+            "<a href=\"" . $self->queue_url .
+            "\">ModLoop queue status page</a>.").
+      $q->p("The following loop segment(s) will be optimized: $loopout in " .
+            "protein: >$user_name< ").
+      $q->p("using the method of Fiser et al. (Prot. Sci. (2000) 9,1753-1773)").
+      $q->p("The estimated execution time is ~90 min, depending on the load.").
+      $q->p("If you experience a problem or you do not receive the results " .
+            "for more than 12 hours, please <a href=\"" .
+            $self->contact_url . "\">contact us</a>.") .
+      $q->p("Thank you for using our server and good luck in your research!").
+      $q->p("Andras Fiser");
+
+    return $return;
+}
+
+# Split out loop selection and check it
+sub parse_loop_selection {
+    my ($loops) = @_;
+
     $loops =~ tr/a-z/A-Z/;    # capitalize
     $loops =~ s/\s+//g;       # remove spaces
     $loops =~ s/::/: :/g;     # replace null chain IDs with a single space
@@ -153,7 +225,7 @@ sub get_submit_page {
             throw saliweb::frontend::InputValidationError(
                     "The loop selected is too long (>20 residues) or " .
                     "shorter than 1 residue or not selected properly " .
-                    "(syntax problem?)".
+                    "(syntax problem?) ".
                     "starting position $start_res[$loops]:$start_id[$loops]," .
                     " ending position: $end_res[$loops]:$end_id[$loops]");
         }
@@ -170,71 +242,8 @@ sub get_submit_page {
         throw saliweb::frontend::InputValidationError(
                               "No loop residues selected!");
     }
-
-
-    ###################################
-    ### read coordinates from file, and check loop residues
-
-    my $user_pdb = read_pdb_file($user_pdb_name, $loops, \@start_res,
-                                 \@start_id, \@end_res, \@end_id);
-
-    my $job = $self->make_job($user_name, $email);
-    my $jobdir = $job->directory;
-
-    ### write pdb input
-    my $pdb_input = "$jobdir/input.pdb";
-    open(INPDB, "> $pdb_input")
-       or throw saliweb::frontend::InternalError("Cannot open $pdb_input: $!");
-    print INPDB $user_pdb;
-    close INPDB
-       or throw saliweb::frontend::InternalError("Cannot close $pdb_input: $!");
-
-    ### write loop selection
-    my $loop_file = "$jobdir/loops.tsv";
-    open(OUT, "> $loop_file")
-       or throw saliweb::frontend::InternalError("Cannot open $loop_file: $!");
-    print OUT join("\t", @loop_data);
-    close OUT
-       or throw saliweb::frontend::InternalError("Cannot close $loop_file: $!");
-
-    $job->submit();
-
-    ## write subject details into a file and pop up an exit page
-    my $loopout = "";
-    for (my $j=0;$j<$loops;$j++) {
-      $loopout .= $start_res[$j].":".$start_id[$j]."-".$end_res[$j].
-                  ":".$end_id[$j]." ";
-    }
-
-    my $return=
-      $q->h1("Job Submitted") .
-      $q->hr .
-      $q->p("Your job has been submitted to the server! " .
-            "Your job ID is " . $job->name . ".") .
-      $q->p("Results will be found at <a href=\"" .
-            $job->results_url . "\">this link</a>.");
-    if ($email) {
-        $return.=$q->p("You will be notified at $email when job results " .
-                       "are available.");
-    }
-
-    $return .=
-      $q->p("You can check on your job at the " .
-            "<a href=\"" . $self->queue_url .
-            "\">ModLoop queue status page</a>.").
-      $q->p("The following loop segment(s) will be optimized: $loopout in " .
-            "protein: >$user_name< ").
-      $q->p("using the method of Fiser et al. (Prot. Sci. (2000) 9,1753-1773)").
-      $q->p("The estimated execution time is ~90 min, depending on the load.").
-      $q->p("If you experience a problem or you do not receive the results " .
-            "for more than 12 hours, please <a href=\"" .
-            $self->contact_url . "\">contact us</a>.") .
-      $q->p("Thank you for using our server and good luck in your research!").
-      $q->p("Andras Fiser");
-
-    return $return;
+    return ($loops, \@start_res, \@start_id, \@end_res, \@end_id, \@loop_data);
 }
-
 
 # Check for loop selection
 sub check_loop_selection {
