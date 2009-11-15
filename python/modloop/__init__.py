@@ -1,7 +1,18 @@
 import saliweb.backend
+import tarfile
 import glob
 import re
 import os
+
+def compress_output_pdbs(pdbs):
+    t = tarfile.open('output-pdbs.tar.bz2', 'w:bz2')
+    for pdb in pdbs:
+        t.add(pdb)
+    t.close()
+
+    for pdb in pdbs:
+        os.unlink(pdb)
+
 
 def get_best_model(pdbs):
     best_pdb = best_score = None
@@ -136,10 +147,12 @@ class Job(saliweb.backend.Job):
         return make_sge_script(self.runnercls, self.name, self.directory)
 
     def postprocess(self):
-        best_model = get_best_model(glob.glob("*.B*.pdb"))
+        output_pdbs = glob.glob("loop*.BL*.pdb")
+        best_model = get_best_model(output_pdbs)
         if best_model:
             loops = open('loops.tsv').read().rstrip('\r\n').split('\t')
             make_output_pdb(best_model, 'output.pdb', self.name, loops)
+            compress_output_pdbs(output_pdbs)
 
 
 def get_web_service(config_file):
