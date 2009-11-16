@@ -287,7 +287,7 @@ sub read_pdb_file {
     $residues{$resid} = 1;
   }
 
-  if ($pdb && ($pdb ne ""))  {
+  if ($pdb) {
     while (<$pdb>) {
       if (/^ATOM.................(.)(....)/) {
         my $resid = &make_residue_id($1, $2);
@@ -303,7 +303,7 @@ sub read_pdb_file {
     throw saliweb::frontend::InputValidationError(
                 "The following residues were not found in ATOM records in" .
                 " the PDB file: " . join(", ", keys(%residues)) .
-                "Check that you specified the loop segments correctly, and" .
+                ". Check that you specified the loop segments correctly, and" .
                 " that you uploaded the correct PDB file.");
   } else {
     return $file_contents;

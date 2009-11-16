@@ -3,6 +3,7 @@
 use saliweb::Test;
 use Test::More 'no_plan';
 use Test::Exception;
+use File::Temp;
 
 BEGIN {
     use_ok('modloop');
@@ -97,4 +98,40 @@ my $t = new saliweb::Test('modloop');
               '                     too many residues';
     like($@, qr/Too many loop residues have been selected.*22 > limit:20/,
          '                     error message');
+}
+
+# Check read_pdb_file
+{
+    my $pdb = new File::Temp();
+    for my $chain (' ', 'A') {
+        for my $resid (1 ... 10) {
+            printf $pdb "ATOM      1  CA  ALA %1s%4d      " .
+                        "18.511  -1.416  15.632  1.00  6.84           C\n",
+                        $chain, $resid;
+
+        }
+    }
+
+    seek($pdb, 0, 0);
+    my $contents = modloop::read_pdb_file($pdb, 2, ['1', '1'], [' ', 'A'],
+                                          ['5', '5'], [' ', 'A']);
+    like($contents,
+         '/^ATOM\s+1\s+CA\s+ALA     1.*ATOM\s+1\s+CA\s+ALA A  10/ms',
+         'read_pdb_file successful read, contents');
+
+    seek($pdb, 0, 0);
+    throws_ok { modloop::read_pdb_file($pdb, 2, ['1', '1'], [' ', 'A'],
+                                       ['5', '15'], [' ', 'A']) }
+              saliweb::frontend::InputValidationError,
+              '              missing residue ID';
+    like($@, qr/not found in ATOM records in the PDB file: 15:A\. Check/,
+         '                                  error message');
+
+    seek($pdb, 0, 0);
+    throws_ok { modloop::read_pdb_file($pdb, 2, ['1', '1'], [' ', 'A'],
+                                       ['5', '5'], [' ', 'B']) }
+              saliweb::frontend::InputValidationError,
+              '              missing chain ID';
+    like($@, qr/not found in ATOM records in the PDB file: 5:B\. Check/,
+         '                                  error message');
 }
