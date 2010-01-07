@@ -22,7 +22,8 @@ class JobTests(saliweb.test.TestCase):
         """Test successful run method"""
         j = self.make_test_job(modloop.Job, 'RUNNING')
         d = saliweb.test.RunInDir(j.directory)
-        open('loops.tsv', 'w').write('1\tA\t5\tA')
+        # Negative residue numbers should be OK
+        open('loops.tsv', 'w').write('1\tA\t-5\tA')
         cls = j.run()
         self.assert_(isinstance(cls, saliweb.backend.SGERunner),
                      "SGERunner not returned")
