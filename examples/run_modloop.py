@@ -6,7 +6,7 @@ then wait for the results. It uses the REST interface automatically set up
 by the web server framework.
 """
 
-rest_url = 'http://modbase.compbio.ucsf.edu/modloop-test/job'
+rest_url = 'http://salilab.org/modloop/job'
 
 import urllib2
 from xml.dom.minidom import parseString
