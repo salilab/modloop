@@ -43,8 +43,9 @@ my $t = new saliweb::Test('modloop');
                          archive_time=>'2009-01-01 08:45:00'});
     my $ret = $frontend->display_failed_job($frontend->{CGI}, $job); 
     like($ret, '/Your ModLoop job.*testjob.*failed to produce any output.*' .
-                'please see the.*#errors.*help page.*For reference, the ' .
-                'MODELLER log is shown below.*contact us/ms',
+               'please see the.*#errors.*help page.*For more information, ' .
+               'you can.*failure\.log.*download the MODELLER log file.*' .
+               'contact us/ms',
          'display_failed_job');
 }
 

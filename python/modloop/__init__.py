@@ -4,6 +4,10 @@ import glob
 import re
 import os
 
+class NoLogError(Exception): pass
+
+class AssertionError(Exception): pass
+
 def compress_output_pdbs(pdbs):
     t = tarfile.open('output-pdbs.tar.bz2', 'w:bz2')
     for pdb in pdbs:
@@ -28,6 +32,21 @@ def get_best_model(pdbs):
                     best_score = score
                 break
     return best_pdb
+
+def make_failure_log(logname):
+    # No logs or a log containing a Modeller fatal error indicates a problem
+    # with the system, and should fail the job (exception). Otherwise, the
+    # job should complete normally and the user should be informed they did
+    # something wrong
+    logs = glob.glob("*.log")
+    if len(logs) > 0:
+        log = logs[0]
+        for line in open(log):
+            if line.startswith('*** ABNORMAL TERMINATION of Modeller'):
+                raise AssertionError("Modeller assertion failure in " + log)
+        os.symlink(log, logname)
+    else:
+        raise NoLogError("No log files produced")
 
 def make_output_pdb(best_model, out, jobname, loops):
     residue_range = []
@@ -153,6 +172,8 @@ class Job(saliweb.backend.Job):
             loops = open('loops.tsv').read().rstrip('\r\n').split('\t')
             make_output_pdb(best_model, 'output.pdb', self.name, loops)
             compress_output_pdbs(output_pdbs)
+        else:
+            make_failure_log('failure.log')
 
 
 def get_web_service(config_file):

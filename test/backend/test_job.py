@@ -33,8 +33,23 @@ class JobTests(saliweb.test.TestCase):
         """Test postprocess method; no models produced"""
         j = self.make_test_job(modloop.Job, 'POSTPROCESSING')
         d = saliweb.test.RunInDir(j.directory)
+        print >> open('1.log', 'w'), "some user error"
         j.postprocess()
         self.assertFalse(os.path.exists('output.pdb'))
+        self.assertTrue(os.path.exists('failure.log'))
+
+    def test_postprocess_no_models_no_logs(self):
+        """Test postprocess method; no models or logs produced"""
+        j = self.make_test_job(modloop.Job, 'POSTPROCESSING')
+        d = saliweb.test.RunInDir(j.directory)
+        self.assertRaises(modloop.NoLogError, j.postprocess)
+
+    def test_postprocess_no_models_assertion(self):
+        """Test postprocess method; Modeller assertion failure"""
+        j = self.make_test_job(modloop.Job, 'POSTPROCESSING')
+        d = saliweb.test.RunInDir(j.directory)
+        print >> open('1.log', 'w'), "*** ABNORMAL TERMINATION of Modeller"
+        self.assertRaises(modloop.AssertionError, j.postprocess)
 
     def test_postprocess_models(self):
         """Test postprocess method; some models produced"""

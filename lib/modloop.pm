@@ -345,23 +345,13 @@ sub display_failed_job {
                    "the " .
                    $q->a({-href=>$self->help_url . "#errors"}, "help page") .
                    ".");
-    $return.= $q->p("For reference, the MODELLER log is shown below. If the " .
-                    "problem is not clear from this log (or if no log " .
-                    "is shown), please <a href=\"" .
+    $return.= $q->p("For more information, you can " .
+                    "<a href=\"" . $job->get_results_file_url("failure.log") .
+                    "\">download the MODELLER log file</a>." .
+                    "If the problem is not clear from this log, " .
+                    "please <a href=\"" .
                     $self->contact_url . "\">contact us</a> for " .
                     "further assistance.");
-    $return.= "<pre>\n";
-    my @logs = glob("*.log");
-    if (scalar(@logs) > 0) {
-        open(LOG, $logs[0])
-              or throw saliweb::frontend::InternalError(
-                                               "Cannot open $logs[0]: $!");
-        while(my $line=<LOG>) {
-            $return.=$line;
-        }
-        close LOG;
-    }
-    $return.= "</pre>\n";
     return $return;
 }
 
