@@ -128,7 +128,7 @@ sub get_submit_page {
     my $user_pdb = read_pdb_file($user_pdb_name, $loops, $start_res,
                                  $start_id, $end_res, $end_id);
 
-    my $job = $self->make_job($user_name, $email);
+    my $job = $self->make_job($user_name);
     my $jobdir = $job->directory;
 
     ### write pdb input
@@ -147,7 +147,7 @@ sub get_submit_page {
     close OUT
        or throw saliweb::frontend::InternalError("Cannot close $loop_file: $!");
 
-    $job->submit();
+    $job->submit($email);
 
     ## write subject details into a file and pop up an exit page
     my $loopout = "";
