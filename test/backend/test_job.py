@@ -32,6 +32,7 @@ class JobTests(saliweb.test.TestCase):
     def test_postprocess_no_models(self):
         """Test postprocess method; no models produced"""
         j = self.make_test_job(modloop.Job, 'POSTPROCESSING')
+        j.required_completed_tasks = 0
         d = saliweb.test.RunInDir(j.directory)
         print >> open('1.log', 'w'), "some user error"
         j.postprocess()
@@ -41,12 +42,14 @@ class JobTests(saliweb.test.TestCase):
     def test_postprocess_no_models_no_logs(self):
         """Test postprocess method; no models or logs produced"""
         j = self.make_test_job(modloop.Job, 'POSTPROCESSING')
+        j.required_completed_tasks = 0
         d = saliweb.test.RunInDir(j.directory)
         self.assertRaises(modloop.NoLogError, j.postprocess)
 
     def test_postprocess_no_models_assertion(self):
         """Test postprocess method; Modeller assertion failure"""
         j = self.make_test_job(modloop.Job, 'POSTPROCESSING')
+        j.required_completed_tasks = 0
         d = saliweb.test.RunInDir(j.directory)
         print >> open('1.log', 'w'), "*** ABNORMAL TERMINATION of Modeller"
         self.assertRaises(modloop.AssertionError, j.postprocess)
@@ -54,6 +57,7 @@ class JobTests(saliweb.test.TestCase):
     def test_postprocess_models(self):
         """Test postprocess method; some models produced"""
         j = self.make_test_job(modloop.Job, 'POSTPROCESSING')
+        j.required_completed_tasks = 0
         d = saliweb.test.RunInDir(j.directory)
         print >> open('loop.BL0.pdb', 'w'), \
                "REMARK   1 MODELLER OBJECTIVE FUNCTION:       309.6122"
@@ -68,6 +72,15 @@ class JobTests(saliweb.test.TestCase):
         os.unlink('ignored.pdb')
         self.assertFalse(os.path.exists('loop.BL0.pdb'))
         self.assertFalse(os.path.exists('loop.BL1.pdb'))
+
+    def test_postprocess_insufficient_models(self):
+        """Test postprocess method; too few models produced"""
+        j = self.make_test_job(modloop.Job, 'POSTPROCESSING')
+        d = saliweb.test.RunInDir(j.directory)
+        print >> open('loop.BL0.pdb', 'w'), \
+               "REMARK   1 MODELLER OBJECTIVE FUNCTION:       309.6122"
+        open('loops.tsv', 'w').write('1\tA\t5\tA')
+        self.assertRaises(modloop.IncompleteJobError, j.postprocess)
 
 if __name__ == '__main__':
     unittest.main()

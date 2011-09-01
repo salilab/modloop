@@ -8,6 +8,8 @@ class NoLogError(Exception): pass
 
 class AssertionError(Exception): pass
 
+class IncompleteJobError(Exception): pass
+
 def compress_output_pdbs(pdbs):
     t = tarfile.open('output-pdbs.tar.bz2', 'w:bz2')
     for pdb in pdbs:
@@ -120,7 +122,7 @@ m.loop.starting_model = m.loop.ending_model = taskid
 m.make()
 """ % locals()
 
-def make_sge_script(runnercls, jobname, directory):
+def make_sge_script(runnercls, jobname, directory, number_of_tasks):
     script = """
 input="loop.py"
 output="${SGE_TASK_ID}.log"
@@ -147,11 +149,14 @@ rm -rf $tmpdir
 """ % locals()
     r = runnercls(script)
     r.set_sge_options("-o output.error -j y -l scratch=1G -l netappsali=1G "
-                      "-r y -N loop -p -4 -t 1-300")
+                      "-r y -N loop -p -4 -t 1-%d" % number_of_tasks)
     return r
 
 
 class Job(saliweb.backend.Job):
+    number_of_tasks = 300
+    required_completed_tasks = 280
+
     runnercls = saliweb.backend.SaliSGERunner
 
     def run(self):
@@ -163,10 +168,17 @@ class Job(saliweb.backend.Job):
             raise saliweb.backend.SanityError("loops should be a multiple of 4")
         p = make_python_script(loops, 'input.pdb', 'loop')
         open('loop.py', 'w').write(p)
-        return make_sge_script(self.runnercls, self.name, self.directory)
+        return make_sge_script(self.runnercls, self.name, self.directory,
+                               self.number_of_tasks)
 
     def postprocess(self):
         output_pdbs = glob.glob("loop*.BL*.pdb")
+        if len(output_pdbs) < self.required_completed_tasks:
+            raise IncompleteJobError("Only %d out of %d modeling tasks "
+                                     "completed - at least %d must complete "
+                                     "for reasonable results" \
+                                     % (len(output_pdbs), self.number_of_tasks,
+                                        self.required_completed_tasks))
         best_model = get_best_model(output_pdbs)
         if best_model:
             loops = open('loops.tsv').read().rstrip('\r\n').split('\t')

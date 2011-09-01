@@ -28,7 +28,7 @@ class PreProcessTests(saliweb.test.TestCase):
     def test_make_sge_script(self):
         """Check make_sge_script function"""
         s = modloop.make_sge_script(saliweb.backend.SGERunner, 'myjob',
-                                    '/foo/bar')
+                                    '/foo/bar', 300)
         self.assert_(isinstance(s, saliweb.backend.SGERunner),
                      "SGERunner not returned")
 
