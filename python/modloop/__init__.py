@@ -173,17 +173,19 @@ class Job(saliweb.backend.Job):
 
     def postprocess(self):
         output_pdbs = glob.glob("loop*.BL*.pdb")
-        if len(output_pdbs) < self.required_completed_tasks:
-            raise IncompleteJobError("Only %d out of %d modeling tasks "
-                                     "completed - at least %d must complete "
-                                     "for reasonable results" \
-                                     % (len(output_pdbs), self.number_of_tasks,
-                                        self.required_completed_tasks))
         best_model = get_best_model(output_pdbs)
         if best_model:
-            loops = open('loops.tsv').read().rstrip('\r\n').split('\t')
-            make_output_pdb(best_model, 'output.pdb', self.name, loops)
-            compress_output_pdbs(output_pdbs)
+            if len(output_pdbs) < self.required_completed_tasks:
+                raise IncompleteJobError("Only %d out of %d modeling tasks "
+                                         "completed - at least %d must "
+                                         "complete for reasonable results" \
+                                         % (len(output_pdbs),
+                                            self.number_of_tasks,
+                                            self.required_completed_tasks))
+            else:
+                loops = open('loops.tsv').read().rstrip('\r\n').split('\t')
+                make_output_pdb(best_model, 'output.pdb', self.name, loops)
+                compress_output_pdbs(output_pdbs)
         else:
             make_failure_log('failure.log')
 
