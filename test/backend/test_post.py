@@ -28,12 +28,16 @@ class PostProcessTests(saliweb.test.TestCase):
         """Check get_best_model function"""
         t = saliweb.test.RunInTempDir()
         print >> open('test1.pdb', 'w'), \
-               "REMARK   1 MODELLER OBJECTIVE FUNCTION:       309.6122"
+               "REMARK   1 MODELLER OBJECTIVE FUNCTION:       309.6122\ndummy"
         print >> open('test2.pdb', 'w'), \
-               "REMARK   1 MODELLER OBJECTIVE FUNCTION:      -457.3816"
+               "dummy\nREMARK   1 MODELLER OBJECTIVE FUNCTION:      -457.3816"
+        open('empty.pdb', 'w')
         self.assertEqual(modloop.get_best_model([]), None)
+        self.assertEqual(modloop.get_best_model(['empty.pdb']), None)
         self.assertEqual(modloop.get_best_model(['test1.pdb']), 'test1.pdb')
         self.assertEqual(modloop.get_best_model(['test1.pdb', 'test2.pdb']),
+                         'test2.pdb')
+        self.assertEqual(modloop.get_best_model(['test2.pdb', 'test1.pdb']),
                          'test2.pdb')
 
     def test_make_output_pdb(self):
