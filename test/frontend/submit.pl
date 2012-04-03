@@ -27,7 +27,12 @@ my $t = new saliweb::Test('modloop');
     ok(close(FH), "Close test.pdb");
     open(FH, "test.pdb");
 
+    throws_ok { $self->get_submit_page() }
+              saliweb::frontend::InputValidationError,
+              "no key";
+
     $cgi->param('pdb', \*FH);
+    $cgi->param('name', 'test');
     $cgi->param('modkey', '***REMOVED***');
     $cgi->param('loops', '1::1::');
     my $ret = $self->get_submit_page();
@@ -134,6 +139,12 @@ my $t = new saliweb::Test('modloop');
     throws_ok { modloop::parse_loop_selection('') }
               "saliweb::frontend::InputValidationError",
               '                     no residues';
+    like($@, qr/No loop residues selected!/,
+         '                     error message');
+
+    throws_ok { modloop::parse_loop_selection('::10::20:A:31:A:') }
+              "saliweb::frontend::InputValidationError",
+              '                     empty first residue';
     like($@, qr/No loop residues selected!/,
          '                     error message');
 }
