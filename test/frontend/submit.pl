@@ -13,6 +13,29 @@ my $t = new saliweb::Test('modloop');
 
 # Check job submission
 
+# Check get_submit_page
+{
+    my $self = $t->make_frontend();
+    my $cgi = $self->cgi;
+
+    my $tmpdir = File::Temp::tempdir(CLEANUP=>1);
+    ok(chdir($tmpdir), "chdir into tempdir");
+
+    ok(mkdir("incoming"), "mkdir incoming");
+    ok(open(FH, "> test.pdb"), "Open test.pdb");
+    print FH "REMARK\nATOM      2  CA  ALA     1      26.711  14.576   5.091\n";
+    ok(close(FH), "Close test.pdb");
+    open(FH, "test.pdb");
+
+    $cgi->param('pdb', \*FH);
+    $cgi->param('modkey', '***REMOVED***');
+    $cgi->param('loops', '1::1::');
+    $self->get_submit_page();
+
+    ok(unlink("incoming/input.pdb"), "remove input PDB file");
+    ok(unlink("incoming/loops.tsv"), "remove loop selection");
+}
+
 # Test check_loop_selection
 {
     modloop::check_loop_selection("anything");
@@ -133,5 +156,12 @@ my $t = new saliweb::Test('modloop');
               saliweb::frontend::InputValidationError,
               '              missing chain ID';
     like($@, qr/not found in ATOM records in the PDB file: 5:B\. Check/,
+         '                                  error message');
+
+    throws_ok { modloop::read_pdb_file(undef, 2, ['1', '1'], [' ', 'A'],
+                                       ['5', '5'], [' ', 'A']) }
+              saliweb::frontend::InputValidationError,
+              '              missing PDB file';
+    like($@, qr/not found in ATOM records in the PDB file: 1:,.*Check/,
          '                                  error message');
 }
