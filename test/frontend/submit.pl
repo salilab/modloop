@@ -46,6 +46,25 @@ my $t = new saliweb::Test('modloop');
                'You can check on your job/ms',
          "submit page HTML");
 
+    # Check file open failure
+    ok(chmod(0, "incoming/input.pdb"), "chmod input PDB");
+    seek(FH, 0, 0);
+    throws_ok { $self->get_submit_page() }
+              saliweb::frontend::InternalError,
+              "input PDB open failure";
+    like($@, qr/Cannot open incoming\/input\.pdb: Permission denied/,
+         "exception message");
+    ok(chmod(0644, "incoming/input.pdb"), "chmod input PDB");
+
+    ok(chmod(0, "incoming/loops.tsv"), "chmod loop selection");
+    seek(FH, 0, 0);
+    throws_ok { $self->get_submit_page() }
+              saliweb::frontend::InternalError,
+              "loop selection open failure";
+    like($@, qr/Cannot open incoming\/loops\.tsv: Permission denied/,
+         "exception message");
+    ok(chmod(0644, "incoming/loops.tsv"), "chmod loop selection");
+
     ok(unlink("incoming/input.pdb"), "remove input PDB file");
     ok(unlink("incoming/loops.tsv"), "remove loop selection");
 }
