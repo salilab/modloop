@@ -30,7 +30,16 @@ my $t = new saliweb::Test('modloop');
     $cgi->param('pdb', \*FH);
     $cgi->param('modkey', '***REMOVED***');
     $cgi->param('loops', '1::1::');
-    $self->get_submit_page();
+    my $ret = $self->get_submit_page();
+    like($ret, qr/Job Submitted.*You can check on your job/ms,
+         "submit page HTML");
+
+    seek(FH, 0, 0);
+    $cgi->param('email', 'test@test.com');
+    $ret = $self->get_submit_page();
+    like($ret, '/Job Submitted.*You will be notified.*' .
+               'You can check on your job/ms',
+         "submit page HTML");
 
     ok(unlink("incoming/input.pdb"), "remove input PDB file");
     ok(unlink("incoming/loops.tsv"), "remove loop selection");
@@ -120,6 +129,12 @@ my $t = new saliweb::Test('modloop');
               "saliweb::frontend::InputValidationError",
               '                     too many residues';
     like($@, qr/Too many loop residues have been selected.*22 > limit:20/,
+         '                     error message');
+
+    throws_ok { modloop::parse_loop_selection('') }
+              "saliweb::frontend::InputValidationError",
+              '                     no residues';
+    like($@, qr/No loop residues selected!/,
          '                     error message');
 }
 
