@@ -67,6 +67,7 @@ my $t = new saliweb::Test('modloop');
 
     ok(unlink("incoming/input.pdb"), "remove input PDB file");
     ok(unlink("incoming/loops.tsv"), "remove loop selection");
+    chdir('/') # Allow the temporary directory to be deleted
 }
 
 # Test check_loop_selection
