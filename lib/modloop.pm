@@ -312,7 +312,7 @@ sub read_pdb_file {
 
 sub allow_file_download {
     my ($self, $file) = @_;
-    return $file eq 'output.pdb';
+    return $file eq 'output.pdb' || $file eq 'failure.log';
 }
 
 sub get_results_page {

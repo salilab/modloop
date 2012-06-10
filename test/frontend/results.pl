@@ -21,7 +21,9 @@ my $t = new saliweb::Test('modloop');
        "allow_file_download bad file");
 
     is($self->allow_file_download('output.pdb'), 1,
-       "                    good file");
+       "                    good file 1");
+    is($self->allow_file_download('failure.log'), 1,
+       "                    good file 2");
 }
 
 # Check display_ok_job
