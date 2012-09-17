@@ -134,7 +134,7 @@ mkdir -p $tmpdir && cd $tmpdir || exit 1
 # Get input files
 cp %(directory)s/$input %(directory)s/input.pdb .
 
-/salilab/diva1/home/modeller/9.10/bin/modpy.sh python $input ${SGE_TASK_ID} >& $output
+/salilab/diva1/home/modeller/9.11/bin/modpy.sh python $input ${SGE_TASK_ID} >& $output
 
 # Copy back PDB
 cp *.B* %(directory)s
