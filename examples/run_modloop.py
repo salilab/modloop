@@ -9,19 +9,28 @@ by the web server framework.
 rest_url = 'http://salilab.org/modloop/job'
 
 import urllib2
+import sys
 from xml.dom.minidom import parseString
+import xml.parsers.expat
 import time
 import subprocess
 
 def submit_job(pdb, modkey, loops):
     # Sadly Python currently has no method to POST multipart forms, so we
     # use curl instead
-    p = subprocess.Popen(['/usr/bin/curl', '-F', 'pdb=@' + pdb,
+    p = subprocess.Popen(['/usr/bin/curl', '-s', '-L', '-F', 'pdb=@' + pdb,
                           '-F', 'modkey=' + modkey, '-F', 'loops=' + loops,
                           rest_url], stdout=subprocess.PIPE,
                           stderr=subprocess.PIPE)
     (out, err) = p.communicate()
-    dom = parseString(out)
+    exitval = p.wait()
+    if exitval != 0:
+        raise OSError("curl failed with exit %d; stderr:\n%s" % (exitval, err))
+    try:
+        dom = parseString(out)
+    except xml.parsers.expat.ExpatError:
+        print >> sys.stderr, "Web service did not return valid XML:\n" + out
+        raise
 
     top = dom.getElementsByTagName('saliweb')[0]
     for results in top.getElementsByTagName('job'):
