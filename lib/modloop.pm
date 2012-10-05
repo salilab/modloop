@@ -102,6 +102,16 @@ GREETING
            "</div>\n";
 }
 
+sub get_submit_parameter_help {
+    my $self = shift;
+    return [
+        $self->parameter("name", "Job name", 1),
+        $self->file_parameter("pdb", "PDB file to be refined"),
+        $self->parameter("modkey", "MODELLER license key"),
+        $self->parameter("loops", "Loops to be refined")
+    ];
+}
+
 sub get_submit_page {
     my $self = shift;
     my $q = $self->cgi;
