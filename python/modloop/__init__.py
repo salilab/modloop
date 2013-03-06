@@ -50,7 +50,7 @@ def make_failure_log(logname):
     else:
         raise NoLogError("No log files produced")
 
-def make_output_pdb(best_model, out, jobname, loops):
+def make_output_pdb(best_model, out, jobname, loops, num_models):
     residue_range = []
     for i in range(0, len(loops), 4):
         residue_range.append("REMARK        %s:%s-%s:%s" \
@@ -61,7 +61,7 @@ def make_output_pdb(best_model, out, jobname, loops):
     print >> fout, """REMARK
 REMARK     Dear User,
 REMARK
-REMARK     Coordinates for the lowest energy model
+REMARK     Coordinates for the lowest energy model (out of %(num_models)d sampled)
 REMARK     of your protein: ``%(jobname)s''  are returned with
 REMARK     the optimized loop regions, listed below:
 %(looplist)s
@@ -184,7 +184,8 @@ class Job(saliweb.backend.Job):
                                             self.required_completed_tasks))
             else:
                 loops = open('loops.tsv').read().rstrip('\r\n').split('\t')
-                make_output_pdb(best_model, 'output.pdb', self.name, loops)
+                make_output_pdb(best_model, 'output.pdb', self.name, loops,
+                                len(output_pdbs))
                 compress_output_pdbs(output_pdbs)
         else:
             make_failure_log('failure.log')
