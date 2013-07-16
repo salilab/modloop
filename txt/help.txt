@@ -53,6 +53,10 @@ position 66 in chain C to be selected:</p>
 98:B:103:B:
 66:C:66:C:
 </pre>
+
+<p>Note that ModLoop refines the position of residues that <b>already</b>
+exist in your PDB file - it does not add missing residues (if you want to do
+that, add the residues with dummy coordinates yourself first).
 </li>
 
 <li>
