@@ -352,12 +352,11 @@ sub display_failed_job {
     $return.=$q->p("This is usually caused by incorrect inputs " .
                    "(e.g. corrupt PDB file, incorrect loop selection).");
     $return.=$q->p("For a discussion of some common input errors, please see " .
-                   "the " .
-                   $q->a({-href=>$self->help_url . "#errors"}, "help page") .
-                   ".");
+                   "the <a href=\"" . $self->help_url .
+                   "#errors\">help page</a>.");
     $return.= $q->p("For more information, you can " .
                     "<a href=\"" . $job->get_results_file_url("failure.log") .
-                    "\">download the MODELLER log file</a>." .
+                    "\">download the MODELLER log file</a>. " .
                     "If the problem is not clear from this log, " .
                     "please <a href=\"" .
                     $self->contact_url . "\">contact us</a> for " .
