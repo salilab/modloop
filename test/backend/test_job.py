@@ -27,6 +27,9 @@ class JobTests(saliweb.test.TestCase):
         cls = j.run()
         self.assert_(isinstance(cls, saliweb.backend.SGERunner),
                      "SGERunner not returned")
+        # Underscore OK for chain ID
+        open('loops.tsv', 'w').write('1\t_\t5\t_')
+        j.run()
         os.unlink('loop.py')
 
     def test_postprocess_no_models(self):
