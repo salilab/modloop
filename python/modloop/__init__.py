@@ -4,11 +4,18 @@ import glob
 import re
 import os
 
-class NoLogError(Exception): pass
 
-class AssertionError(Exception): pass
+class NoLogError(Exception):
+    pass
 
-class IncompleteJobError(Exception): pass
+
+class AssertionError(Exception):
+    pass
+
+
+class IncompleteJobError(Exception):
+    pass
+
 
 def compress_output_pdbs(pdbs):
     t = tarfile.open('output-pdbs.tar.bz2', 'w:bz2')
@@ -35,6 +42,7 @@ def get_best_model(pdbs):
                 break
     return best_pdb
 
+
 def make_failure_log(logname):
     # No logs or a log containing a Modeller fatal error indicates a problem
     # with the system, and should fail the job (exception). Otherwise, the
@@ -50,11 +58,12 @@ def make_failure_log(logname):
     else:
         raise NoLogError("No log files produced")
 
+
 def make_output_pdb(best_model, out, jobname, loops, num_models):
     residue_range = []
     for i in range(0, len(loops), 4):
-        residue_range.append("REMARK        %s:%s-%s:%s" \
-                             % tuple(loops[i:i+4]))
+        residue_range.append("REMARK        %s:%s-%s:%s"
+                             % tuple(loops[i:i + 4]))
     looplist = "\n".join(residue_range)
     fin = open(best_model)
     fout = open(out, 'w')
@@ -85,11 +94,12 @@ REMARK
 REMARK""" % locals()
     fout.writelines(fin)
 
+
 def make_python_script(loops, input_pdb, sequence):
     residue_range = []
     for i in range(0, len(loops), 4):
         residue_range.append("           self.residue_range"
-                             "('%s:%s', '%s:%s')," % tuple(loops[i:i+4]))
+                             "('%s:%s', '%s:%s')," % tuple(loops[i:i + 4]))
     residue_range = "\n".join(residue_range)
     return """
 # Input: ${SGE_TASK_ID}
@@ -121,6 +131,7 @@ m.loop.starting_model = m.loop.ending_model = taskid
 
 m.make()
 """ % locals()
+
 
 def make_sge_script(runnercls, jobname, directory, number_of_tasks):
     script = """
@@ -166,7 +177,8 @@ class Job(saliweb.backend.Job):
             raise saliweb.backend.SanityError("Invalid character in loops.tsv")
         loops = loops.split('\t')
         if len(loops) % 4 != 0:
-            raise saliweb.backend.SanityError("loops should be a multiple of 4")
+            raise saliweb.backend.SanityError(
+                "loops should be a multiple of 4")
         p = make_python_script(loops, 'input.pdb', 'loop')
         open('loop.py', 'w').write(p)
         return make_sge_script(self.runnercls, self.name, self.directory,
@@ -179,7 +191,7 @@ class Job(saliweb.backend.Job):
             if len(output_pdbs) < self.required_completed_tasks:
                 raise IncompleteJobError("Only %d out of %d modeling tasks "
                                          "completed - at least %d must "
-                                         "complete for reasonable results" \
+                                         "complete for reasonable results"
                                          % (len(output_pdbs),
                                             self.number_of_tasks,
                                             self.required_completed_tasks))
