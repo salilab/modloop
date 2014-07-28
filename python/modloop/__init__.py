@@ -102,9 +102,13 @@ def make_python_script(loops, input_pdb, sequence):
                              "('%s:%s', '%s:%s')," % tuple(loops[i:i + 4]))
     residue_range = "\n".join(residue_range)
     return """
-# Input: ${SGE_TASK_ID}
-# Output: generated models in *.B* files, calculated energies in *.E* files
+# Run this script with something like
+#    python loop.py N > N.log
+# where N is an integer from 1 to the number of models.
 #
+# ModLoop does this for N from 1 to 300 (it runs the tasks in parallel on a
+# compute cluster), then returns the single model with the best (lowest)
+# value of the Modeller objective function.
 
 from modeller import *
 from modeller.automodel import *
