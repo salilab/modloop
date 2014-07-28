@@ -322,7 +322,8 @@ sub read_pdb_file {
 
 sub allow_file_download {
     my ($self, $file) = @_;
-    return $file eq 'output.pdb' || $file eq 'failure.log';
+    return $file eq 'output.pdb' || $file eq 'failure.log'
+           || $file eq 'loop.py';
 }
 
 sub get_results_page {
@@ -339,8 +340,10 @@ sub display_ok_job {
     my ($self, $q, $job) = @_;
     my $return= $q->p("Job '<b>" . $job->name . "</b>' has completed.");
 
-    $return.= $q->p("<a href=\"" . $job->get_results_file_url("output.pdb") .
-                    "\">Download output PDB</a>.");
+    $return.= $q->p("<p><a href=\"" . $job->get_results_file_url("output.pdb") .
+                    "\">Download output PDB</a>.</p>");
+    $return.= $q->p("<p><a href=\"" . $job->get_results_file_url("loop.py") .
+                    "\">Download MODELLER script file</a>.</p>");
     $return .= $job->get_results_available_time();
     return $return;
 }
