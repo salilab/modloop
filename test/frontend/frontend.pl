@@ -44,3 +44,11 @@ my $t = new saliweb::Test('modloop');
     like($txt, qr/ModLoop is a web server/ms,
          'get_index_page');
 }
+
+# Test get_index_page
+{
+    my $self = $t->make_frontend();
+    my $help = $self->get_submit_parameter_help();
+    isa_ok($help, 'ARRAY', 'get_submit_parameter_help links');
+    is(scalar(@$help), 4, 'get_submit_parameter_help length');
+}
