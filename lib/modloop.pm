@@ -195,7 +195,9 @@ sub get_submit_page {
     return $return;
 }
 
-# Split out loop selection and check it
+=item parse_loop_selection
+Split out loop selection and check it
+=cut
 sub parse_loop_selection {
     my ($loops) = @_;
 
@@ -255,7 +257,9 @@ sub parse_loop_selection {
     return ($loops, \@start_res, \@start_id, \@end_res, \@end_id, \@loop_data);
 }
 
-# Check for loop selection
+=item check_loop_selection
+Check for loop selection
+=cut
 sub check_loop_selection {
     my ($loop) = @_;
     if ($loop eq "") {
@@ -264,7 +268,9 @@ sub check_loop_selection {
     }
 }
 
-# Check if a PDB name was specified
+=item check_pdb_name
+Check if a PDB name was specified
+=cut
 sub check_pdb_name {
     my ($pdb_name) = @_;
     if (!$pdb_name) {
@@ -273,6 +279,9 @@ sub check_pdb_name {
     }
 }
 
+=item make_residue_id
+Format a chain and a residue number into a Modeller style residue:chain string
+=cut
 sub make_residue_id {
   my ($chain, $residue) = @_;
   $chain =~ s/ //g;
@@ -280,7 +289,9 @@ sub make_residue_id {
   return "$residue:$chain";
 }
 
-# Read in uploaded PDB file, and check loop residues
+=item read_pdb_file
+Read in uploaded PDB file, and check loop residues
+=cut
 sub read_pdb_file {
   my ($pdb, $loops, $start_res, $start_id, $end_res, $end_id) = @_;
   my @start_res=@$start_res;
@@ -336,6 +347,9 @@ sub get_results_page {
     }
 }
 
+=item display_failed_job
+Display the output model for a successful job
+=cut
 sub display_ok_job {
     my ($self, $q, $job) = @_;
     my $return= $q->p("Job '<b>" . $job->name . "</b>' has completed.");
@@ -348,6 +362,9 @@ sub display_ok_job {
     return $return;
 }
 
+=item display_failed_job
+Display the log file for a failed job
+=cut
 sub display_failed_job {
     my ($self, $q, $job) = @_;
     my $return= $q->p("Your ModLoop job '<b>" . $job->name .
