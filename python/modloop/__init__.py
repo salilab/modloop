@@ -125,7 +125,7 @@ class MyLoop(loopmodel):
         )
         s = selection(res)
         if len(s.only_no_topology()) > 0:
-            raise ModellerError, "some selected residues have no topology"
+            raise ModellerError("some selected residues have no topology")
         return s
 
 m = MyLoop(env, inimodel='%(input_pdb)s',
