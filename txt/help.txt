@@ -82,6 +82,16 @@ coordinates, but don't put every atom at (0,0,0).)</li>
 protocol is only defined on standard amino acids. Thus, you can't select
 residues for modeling which have no defined MODELLER topology, such as
 DNA/RNA, metal ions, or ligands.</li>
+
+<li><b>'loop too long'</b>: this can happen if your PDB file residues are
+not sequential, or the chains are interleaved. MODELLER reads PDB files
+strictly sequentially, so if your PDB file contains residues 1-100 in chain A,
+followed by 1-100 in chain B, followed by 101-200 in chain A, and your loop
+selection is 99:A:101:A:, MODELLER will actually try to model the entire B
+chain (since it falls between residues 99 and 101 in chain A). This is
+probably not what you intended. In this case, the easiest solution is to
+reorder the PDB file in a text editor to stick the two parts of chain A
+together.</li>
 </ul>
 
 <hr />

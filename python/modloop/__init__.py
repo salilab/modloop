@@ -120,10 +120,13 @@ env = environ(rand_seed=-1000-taskid)
 
 class MyLoop(loopmodel):
     def select_loop_atoms(self):
-        res = (
+        rngs = (
 %(residue_range)s
         )
-        s = selection(res)
+        for rng in rngs:
+            if len(rng) > 30:
+                raise ModellerError("loop too long")
+        s = selection(rngs)
         if len(s.only_no_topology()) > 0:
             raise ModellerError("some selected residues have no topology")
         return s
