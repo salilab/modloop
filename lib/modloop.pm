@@ -23,7 +23,7 @@ sub get_navigation_links {
 
 sub get_project_menu {
     my $self = shift;
-    my $version = $self->version;
+    my $version = $self->version_link;
     return <<MENU;
 <p>&nbsp;</p>
 <p>&nbsp;</p>
