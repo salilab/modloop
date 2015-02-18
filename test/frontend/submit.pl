@@ -33,7 +33,7 @@ my $t = new saliweb::Test('modloop');
 
     $cgi->param('pdb', \*FH);
     $cgi->param('name', 'test');
-    $cgi->param('modkey', '***REMOVED***');
+    $cgi->param('modkey', '\@MODELLERKEY\@');
     $cgi->param('loops', '1::1::');
     my $ret = $self->get_submit_page();
     like($ret, qr/Job Submitted.*You can check on your job/ms,

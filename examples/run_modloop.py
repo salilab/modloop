@@ -54,7 +54,7 @@ def get_results(url):
 
 def main():
     pdb = 'modeller/examples/atom_files/1fdx.B99990001.pdb'
-    modkey = '***REMOVED***'
+    modkey = 'MY_MODELLER_KEY'
     loops = '1::5::'
     url = submit_job(pdb, modkey, loops)
     print "Results will be found at " + url
