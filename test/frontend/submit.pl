@@ -1,6 +1,7 @@
 #!/usr/bin/perl -w
 
 use saliweb::Test;
+use saliweb::frontend;
 use Test::More 'no_plan';
 use Test::Exception;
 use File::Temp;
@@ -33,7 +34,7 @@ my $t = new saliweb::Test('modloop');
 
     $cgi->param('pdb', \*FH);
     $cgi->param('name', 'test');
-    $cgi->param('modkey', '\@MODELLERKEY\@');
+    $cgi->param('modkey', get_modeller_key());
     $cgi->param('loops', '1::1::');
     my $ret = $self->get_submit_page();
     like($ret, qr/Job Submitted.*You can check on your job/ms,
