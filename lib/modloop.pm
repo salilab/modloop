@@ -9,6 +9,18 @@ sub new {
     return saliweb::frontend::new(@_, @CONFIG@);
 }
 
+# Add our own CSS to the page header
+sub get_start_html_parameters {
+  my ($self, $style) = @_;
+  my %param = $self->SUPER::get_start_html_parameters($style);
+  push @{$param{-style}->{'-src'}}, 'html/modloop.css';
+  return %param;
+}
+
+sub get_page_is_responsive {
+    return 1; # All web pages should look OK on a smartphone
+}
+
 sub get_navigation_links {
     my $self = shift;
     my $q = $self->cgi;
@@ -76,22 +88,26 @@ GREETING
                              $self->help_link("email")),
                       $q->td($q->textfield({-name=>"email",
                                             -value=>$self->email,
-                                            -size=>"25"}))) .
+                                            -class=>"wide",
+                                            -size=>"5"}))) .
                $q->Tr($q->td("Modeller license key",
                              $self->help_link("modkey")), 
                       $q->td($q->textfield({-name=>"modkey",
                                             -value=>$self->modeller_key,
-                                            -size=>"25"}))) .
+                                            -class=>"wide",
+                                            -size=>"5"}))) .
                $q->Tr($q->td("Upload coordinate file",
                              $self->help_link("file"), $q->br),
                       $q->td($q->filefield({-name=>"pdb"}))) .
                $q->Tr($q->td($q->h3("Enter loop segments",
                                     $self->help_link("loop"))),
                       $q->td($q->textarea({-name=>"loops",
-                                           -rows=>"10", -cols=>"40"}))) .
+                                           -class=>"loopsegs",
+                                           -rows=>"10", -cols=>"20"}))) .
                $q->Tr($q->td($q->h3("Name your model",
                                     $self->help_link("name"))),
                       $q->td($q->textfield({-name=>"name",
+                                            -class=>"wide",
                                             -value=>"loop", -size=>"9"}))) .
                $q->Tr($q->td({-colspan=>"2"},
                              "<center>" .
