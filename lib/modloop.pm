@@ -55,12 +55,12 @@ sub get_footer {
     my $htmlroot = $self->htmlroot;
     return <<FOOTER;
 <div id="address">
-<center><a href="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?db=pubmed&amp;cmd=Retrieve&amp;dopt=AbstractPlus&amp;list_uids=11045621&amp;query_hl=2&amp;itool=pubmed_docsum">
+<center><a href="https://www.ncbi.nlm.nih.gov/entrez/query.fcgi?db=pubmed&amp;cmd=Retrieve&amp;dopt=AbstractPlus&amp;list_uids=11045621&amp;query_hl=2&amp;itool=pubmed_docsum">
 <b>A. Fiser,  R.K.G. Do and A. Sali, Prot Sci, (2000) <i>9,</i> 1753-1773</b></a>
-&nbsp;<a href="http://salilab.org/pdf/Fiser_ProteinSci_2000.pdf"><img src="$htmlroot/img/pdf.gif" alt="PDF" /></a><br />
-<a href="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?db=pubmed&amp;cmd=Retrieve&amp;dopt=AbstractPlus&amp;list_uids=14668246&amp;query_hl=2&amp;itool=pubmed_docsum">
+&nbsp;<a href="https://salilab.org/pdf/Fiser_ProteinSci_2000.pdf"><img src="$htmlroot/img/pdf.gif" alt="PDF" /></a><br />
+<a href="https://www.ncbi.nlm.nih.gov/entrez/query.fcgi?db=pubmed&amp;cmd=Retrieve&amp;dopt=AbstractPlus&amp;list_uids=14668246&amp;query_hl=2&amp;itool=pubmed_docsum">
 <b>A. Fiser, and A. Sali, Bioinformatics, (2003) <i>19,</i> 2500-01</b></a>
-&nbsp;<a href="http://salilab.org/pdf/Fiser_ProteinSci_2000.pdf"><img src="$htmlroot/img/pdf.gif" alt="PDF" /></a></center>
+&nbsp;<a href="https://salilab.org/pdf/Fiser_ProteinSci_2000.pdf"><img src="$htmlroot/img/pdf.gif" alt="PDF" /></a></center>
 </div>
 FOOTER
 }
