@@ -45,7 +45,7 @@ def get_results(url):
         try:
             u = urllib2.urlopen(url)
             return u
-        except urllib2.HTTPError, detail:
+        except urllib2.HTTPError as detail:
             if detail.code == 503:
                 print "Not done yet: waiting and retrying"
             else:
