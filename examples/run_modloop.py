@@ -6,6 +6,8 @@ then wait for the results. It uses the REST interface automatically set up
 by the web server framework.
 """
 
+from __future__ import print_function
+
 rest_url = 'http://salilab.org/modloop/job'
 
 import urllib2
@@ -29,7 +31,7 @@ def submit_job(pdb, modkey, loops):
     try:
         dom = parseString(out)
     except xml.parsers.expat.ExpatError:
-        print >> sys.stderr, "Web service did not return valid XML:\n" + out
+        print("Web service did not return valid XML:\n" + out, file=sys.stderr)
         raise
 
     top = dom.getElementsByTagName('saliweb')[0]
@@ -47,7 +49,7 @@ def get_results(url):
             return u
         except urllib2.HTTPError as detail:
             if detail.code == 503:
-                print "Not done yet: waiting and retrying"
+                print("Not done yet: waiting and retrying")
             else:
                 raise
         time.sleep(30)
@@ -57,18 +59,18 @@ def main():
     modkey = 'MY_MODELLER_KEY'
     loops = '1::5::'
     url = submit_job(pdb, modkey, loops)
-    print "Results will be found at " + url
+    print("Results will be found at " + url)
 
     u = get_results(url)
     dom = parseString(u.read())
 
-    print "Got results:"
+    print("Got results:")
     top = dom.getElementsByTagName('saliweb')[0]
     for results in top.getElementsByTagName('results_file'):
         url = results.getAttribute('xlink:href')
-        print "   " + url
+        print("   " + url)
         u = urllib2.urlopen(url)
-        print u.read()
+        print(u.read())
     dom.unlink()
 
 if __name__ == '__main__':
