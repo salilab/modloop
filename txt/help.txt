@@ -17,7 +17,7 @@ is not emailed directly to you, but can be downloaded from this web site.)</p>
 module is implemented in the MODELLER program, therefore you need to register
 for a license of MODELLER. It can be done online and
 automatically by accessing the
-<a href="http://salilab.org/modeller/registration.html">MODELLER web site</a>.
+<a href="https://salilab.org/modeller/registration.html">MODELLER web site</a>.
 The web site will email you a MODELLER key. You need to enter this license key
 here in order to use this server.</p>
 </li>
@@ -99,8 +99,8 @@ together.</li>
 <h3><a id="local">Running ModLoop locally</a></h3>
 
 <p>The ModLoop protocol is part of Modeller, which can be downloaded from
-<a href="http://salilab.org/modeller/">our website</a> and is free for
+<a href="https://salilab.org/modeller/">our website</a> and is free for
 academic use. An example Modeller script for loop refinement can be found
-<a href="http://salilab.org/modeller/9.13/manual/node35.html">in the Modeller
+<a href="https://salilab.org/modeller/9.13/manual/node35.html">in the Modeller
 manual</a>. ModLoop simply builds 300 models with Modeller, and then returns
 the single model with the lowest molpdf score.</p>
