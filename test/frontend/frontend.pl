@@ -37,6 +37,14 @@ my $t = new saliweb::Test('modloop');
          'get_footer');
 }
 
+# Test get_download_page
+{
+    my $self = $t->make_frontend();
+    my $txt = $self->get_download_page();
+    like($txt, qr/source code for this web service is also/ms,
+         'get_download_page');
+}
+
 # Test get_index_page
 {
     my $self = $t->make_frontend();

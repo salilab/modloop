@@ -28,6 +28,7 @@ sub get_navigation_links {
         $q->a({-href=>$self->index_url}, "ModLoop Home"),
         $q->a({-href=>$self->queue_url}, "Current ModLoop queue"),
         $q->a({-href=>$self->help_url}, "Help"),
+        $q->a({-href=>$self->download_url}, "Download"),
         $q->a({-href=>$self->contact_url}, "Contact")
 #       $q->a({-href=>$self->news_url}, "News"),
         ];
@@ -345,6 +346,23 @@ sub read_pdb_file {
   } else {
     return $file_contents;
   }
+}
+
+sub get_download_page {
+    return <<TEXT;
+<h2>Running ModLoop locally</h2>
+
+<p>The ModLoop protocol is part of Modeller, which can be downloaded from
+<a href="https://salilab.org/modeller/">our website</a> and is free for
+academic use. An example Modeller script for loop refinement can be found
+<a href="https://salilab.org/modeller/9.13/manual/node35.html">in the Modeller
+manual</a>. ModLoop simply builds 300 models with Modeller, and then returns
+the single model with the lowest molpdf score.</p>
+
+<p>The source code for this web service is also
+<a href="https://github.com/salilab/modloop/">available at GitHub</a>.
+</p>
+TEXT
 }
 
 sub allow_file_download {
