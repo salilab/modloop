@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/salilab/modloop.svg?branch=master)](https://travis-ci.org/salilab/modloop)
 [![codecov](https://codecov.io/gh/salilab/modloop/branch/master/graph/badge.svg)](https://codecov.io/gh/salilab/modloop)
+[![Code Climate](https://codeclimate.com/github/salilab/modloop/badges/gpa.svg)](https://codeclimate.com/github/salilab/modloop)
 
 This is the source code for [ModLoop](https://salilab.org/modloop/), a web
 service for the automated modeling of loops in protein structures. It uses
