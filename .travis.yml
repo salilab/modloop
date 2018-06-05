@@ -9,14 +9,15 @@ cache:
     - $HOME/perl5
 install:
   - export PERL5LIB=~/perl5/lib/perl5
+  - export PYTHONPATH=$(echo $(dirname $(which python))/../lib/python*/site-packages)
   - export PATH=~/perl5/bin:$PATH
   - pip install coverage
   - curl -L https://cpanmin.us/ -o cpanm && chmod a+x cpanm
   - ./cpanm --local-lib=~/perl5 --quiet --notest --skip-satisfied Devel::Cover::Report::Codecov Test::Exception Test::Output Devel::Cover MIME::Lite
   - git clone --depth=5 https://github.com/salilab/saliweb
-  - (cd saliweb && scons modeller_key=UNKNOWN pythondir=$(echo $(dirname $(which python))/../lib/python*/site-packages) perldir=~/perl5/lib/perl5 prefix=~/usr webdir=~/www install)
+  - (cd saliweb && scons modeller_key=UNKNOWN pythondir=$PYTHONPATH perldir=~/perl5/lib/perl5 prefix=~/usr webdir=~/www install)
 script:
-  - scons coverage=true test
+  - scons coverage=true python=$(which python) test
 after_success:
   - bash <(curl -s https://codecov.io/bash)
   - cover -report codecov
