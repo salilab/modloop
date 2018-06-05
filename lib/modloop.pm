@@ -340,7 +340,7 @@ sub read_pdb_file {
   if (scalar(keys %residues) > 0) {
     throw saliweb::frontend::InputValidationError(
                 "The following residues were not found in ATOM records in" .
-                " the PDB file: " . join(", ", keys(%residues)) .
+                " the PDB file: " . join(", ", sort keys(%residues)) .
                 ". Check that you specified the loop segments correctly, and" .
                 " that you uploaded the correct PDB file.");
   } else {
