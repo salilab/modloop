@@ -152,7 +152,7 @@ mkdir -p $tmpdir && cd $tmpdir || exit 1
 # Get input files
 cp %(directory)s/$input %(directory)s/input.pdb .
 
-module load modeller/9.19
+module load modeller/9.20
 python $input ${SGE_TASK_ID} >& $output
 
 # Copy back PDB
