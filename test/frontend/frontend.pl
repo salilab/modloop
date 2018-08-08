@@ -9,6 +9,20 @@ BEGIN {
 
 my $t = new saliweb::Test('modloop');
 
+# Test get_start_html_parameters
+{
+    my $self = $t->make_frontend();
+    my %param = $self->get_start_html_parameters("test");
+    like($param{-style}->{-src}->[-1], qr/modloop\.css/);
+}
+
+# Test get_page_is_responsive
+{
+    my $self = $t->make_frontend();
+    my $r = $self->get_page_is_responsive();
+    is($r, 1, 'responsive');
+}
+
 # Test get_navigation_links
 {
     my $self = $t->make_frontend();
