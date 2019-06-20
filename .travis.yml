@@ -10,6 +10,7 @@ addons:
   apt:
     packages:
     - scons
+    - libdbi-perl
 cache:
   pip: true
   directories:
