@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+
+{% block title %}ModLoop Results{% endblock %}
+
+{% block body %}
+<p>Job '<b>{{ job.name }}</b>' has completed.</p>
+
+<p><a href="{{ job.get_results_file_url('output.pdb') }}">Download output PDB</a>.</p>
+
+<p><a href="{{ job.get_results_file_url('loop.py') }}">Download MODELLER script file</a>.</p>
+
+{{ job.get_results_available_time() }}
+{% endblock %}

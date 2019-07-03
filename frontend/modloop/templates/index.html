@@ -1,0 +1,61 @@
+{% extends "layout.html" %}
+
+{% block title %}ModLoop{% endblock %}
+
+{% block body %}
+<h2 align="center">ModLoop: Modeling of Loops in Protein Structures</h2>
+
+<form method="post" action="{{ url_for("job") }}"
+ enctype="multipart/form-data" name="modloopform">
+  <table>
+    <tr>
+      <td colspan="2">
+        <p>ModLoop is a web server for automated modeling of loops in protein
+        structures. The server relies on the loop modeling routine in MODELLER
+        that predicts the loop conformations by satisfaction of spatial
+        restraints, without relying on a database of known protein structures.
+        <br />&nbsp;</p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <h3>General information <a class="helplink" onclick="launchHelp('http://modbase.compbio.ucsf.edu/modloop/help.cgi?type=help&amp;style=helplink#general'); return false;" href="http://modbase.compbio.ucsf.edu/modloop/help.cgi?type=help&amp;style=helplink#general"><img class="helplink" src="/saliweb/img/help.jpg" alt="help" /></a></h3>
+      </td>
+    </tr>
+    <tr>
+      <td>Email address (optional) <a class="helplink" onclick="launchHelp('http://modbase.compbio.ucsf.edu/modloop/help.cgi?type=help&amp;style=helplink#email'); return false;" href="http://modbase.compbio.ucsf.edu/modloop/help.cgi?type=help&amp;style=helplink#email"><img class="helplink" src="/saliweb/img/help.jpg" alt="help" /></a>
+      </td>
+      <td><input type="text" name="email"  size="5" class="wide" />
+      </td>
+    </tr>
+    <tr>
+      <td>Modeller license key <a class="helplink" onclick="launchHelp('http://modbase.compbio.ucsf.edu/modloop/help.cgi?type=help&amp;style=helplink#modkey'); return false;" href="http://modbase.compbio.ucsf.edu/modloop/help.cgi?type=help&amp;style=helplink#modkey"><img class="helplink" src="/saliweb/img/help.jpg" alt="help" /></a>
+      </td>
+      <td><input type="text" name="modkey"  size="5" class="wide" />
+      </td>
+    </tr>
+    <tr>
+      <td>Upload coordinate file <a class="helplink" onclick="launchHelp('http://modbase.compbio.ucsf.edu/modloop/help.cgi?type=help&amp;style=helplink#file'); return false;" href="http://modbase.compbio.ucsf.edu/modloop/help.cgi?type=help&amp;style=helplink#file"><img class="helplink" src="/saliweb/img/help.jpg" alt="help" /></a> <br />
+      </td>
+      <td><input type="file" name="pdb"  />
+      </td>
+    </tr>
+    <tr>
+      <td><h3>Enter loop segments <a class="helplink" onclick="launchHelp('http://modbase.compbio.ucsf.edu/modloop/help.cgi?type=help&amp;style=helplink#loop'); return false;" href="http://modbase.compbio.ucsf.edu/modloop/help.cgi?type=help&amp;style=helplink#loop"><img class="helplink" src="/saliweb/img/help.jpg" alt="help" /></a></h3>
+      </td>
+      <td><textarea name="loops"  rows="10" cols="20" class="loopsegs"></textarea>
+      </td>
+    </tr>
+    <tr>
+      <td><h3>Name your model <a class="helplink" onclick="launchHelp('http://modbase.compbio.ucsf.edu/modloop/help.cgi?type=help&amp;style=helplink#name'); return false;" href="http://modbase.compbio.ucsf.edu/modloop/help.cgi?type=help&amp;style=helplink#name"><img class="helplink" src="/saliweb/img/help.jpg" alt="help" /></a></h3>
+      </td>
+      <td><input type="text" name="name" value="loop" size="9" class="wide" />
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2"><center><input type="submit" value="Process" /><input type="reset" value="Reset" /></center><p>&nbsp;</p>
+      </td>
+    </tr>
+  </table>
+</form>
+{% endblock %}

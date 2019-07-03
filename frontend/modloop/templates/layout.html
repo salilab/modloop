@@ -1,0 +1,38 @@
+{% extends "saliweb/layout.html" %}
+
+{%- block css %}
+<link rel="stylesheet" type="text/css" href="{{ url_for("static", filename='modloop.css') }}" />
+{%- endblock %}
+
+{% block navigation %}
+<a href="https://modbase.compbio.ucsf.edu/scgi/server.cgi">Login</a>&nbsp;&bull;&nbsp;
+<a href="{{ url_for("index") }}">ModLoop Home</a>&nbsp;&bull;&nbsp;
+<a href="{{ url_for("job") }}">Current ModLoop queue</a>&nbsp;&bull;&nbsp;
+<a href="{{ url_for("help") }}">Help</a>&nbsp;&bull;&nbsp;
+<a href="{{ url_for("download") }}">Download</a>&nbsp;&bull;&nbsp;
+<a href="{{ url_for("contact") }}">Contact</a>
+{% endblock %}
+
+{% block sidebar %}
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<h4><small>Developer:</small></h4><p>Andras Fiser</p>
+<h4><small>Acknowledgements:</small></h4>
+<p>Ben Webb<br />
+Ursula Pieper<br />
+<br />
+Andrej Sali</p>
+<p><i>Version <a href="https://github.com/salilab/modloop">{{ config.VERSION }}</a></i></p>
+{% endblock %}
+
+{% block footer %}
+<div id="address">
+<center><a href="https://www.ncbi.nlm.nih.gov/entrez/query.fcgi?db=pubmed&amp;cmd=Retrieve&amp;dopt=AbstractPlus&amp;list_uids=11045621&amp;query_hl=2&amp;itool=pubmed_docsum">
+<b>A. Fiser,  R.K.G. Do and A. Sali, Prot Sci, (2000) <i>9,</i> 1753-1773</b></a>
+&nbsp;<a href="https://salilab.org/pdf/Fiser_ProteinSci_2000.pdf"><img src="{{ url_for("static", filename='img/pdf.gif') }}" alt="PDF" /></a><br />
+<a href="https://www.ncbi.nlm.nih.gov/entrez/query.fcgi?db=pubmed&amp;cmd=Retrieve&amp;dopt=AbstractPlus&amp;list_uids=14668246&amp;query_hl=2&amp;itool=pubmed_docsum">
+<b>A. Fiser, and A. Sali, Bioinformatics, (2003) <i>19,</i> 2500-01</b></a>
+&nbsp;<a href="https://salilab.org/pdf/Fiser_ProteinSci_2000.pdf"><img src="{{ url_for("static", filename='img/pdf.gif') }}" alt="PDF" /></a></center>
+</div>
+{% endblock %}

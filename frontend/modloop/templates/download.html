@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block title %}ModLoop Download{% endblock %}
+
+{% block body %}
+<p>The ModLoop protocol is part of Modeller, which can be downloaded from
+<a href="https://salilab.org/modeller/">our website</a> and is free for
+academic use. An example Modeller script for loop refinement can be found
+<a href="https://salilab.org/modeller/9.17/manual/node36.html">in the Modeller
+manual</a>. ModLoop simply builds 300 models with Modeller, and then returns
+the single model with the lowest molpdf score.</p>
+
+<p>The source code for this web service is also
+<a href="https://github.com/salilab/modloop/">available at GitHub</a>.
+</p>
+{% endblock %}
