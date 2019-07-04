@@ -1,6 +1,7 @@
 from flask import render_template, request, send_from_directory
 import saliweb.frontend
 from saliweb.frontend import get_completed_job
+from . import submit
 
 
 app = saliweb.frontend.make_application(__name__, "##CONFIG##")
@@ -31,7 +32,7 @@ def job():
     if request.method == 'GET':
         return saliweb.frontend.render_queue_page()
     else:
-        return render_template('submit.html')
+        return submit.handle_new_job()
 
 
 @app.route('/job/<name>')

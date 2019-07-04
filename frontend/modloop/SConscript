@@ -2,4 +2,4 @@ Import('env')
 
 SConscript('templates/SConscript')
 
-env.InstallPythonFrontend(['__init__.py'])
+env.InstallPythonFrontend(['__init__.py', 'submit.py'])
