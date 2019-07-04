@@ -22,7 +22,27 @@ def handle_new_job():
     user_pdb = read_pdb_file(user_pdb_name, loops, start_res,
                              start_id, end_res, end_id)
 
-    return render_template('submit.html')
+    job = {}
+
+    job = saliweb.frontend.IncomingJob(user_name)
+
+    # Write PDB input
+    with open(job.get_path('input.pdb'), 'w') as fh:
+        fh.writelines(user_pdb)
+
+    # Write loop selection
+    with open(job.get_path('loops.tsv'), 'w') as fh:
+        fh.write("\t".join(loop_data) + "\n")
+
+    job.submit(email)
+
+    # Pop up an exit page
+    loopout = " ".join("%d:%s-%d:%s" % (sr, si, er, ei)
+                       for (sr, si, er, ei) in zip(start_res, start_id,
+                                                   end_res, end_id))
+
+    return render_template('submit.html', loopout=loopout, user_name=user_name,
+                           email=email, job=job)
 
 
 def check_loop_selection(loops):
@@ -122,4 +142,4 @@ def read_pdb_file(pdb, loops, start_res, start_id, end_res, end_id):
             " the PDB file: " + ", ".join(sorted(residues)) +
             ". Check that you specified the loop segments correctly, and"
             " that you uploaded the correct PDB file.")
-    return "".join(file_contents)
+    return file_contents

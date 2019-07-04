@@ -3,5 +3,27 @@
 {% block title %}ModLoop Job Submission{% endblock %}
 
 {% block body %}
-<p>Submit page</p>
+<p>Your job has been submitted to the server!
+Your job ID is {{ job.name }}.</p>
+
+<p>Results will be found at <a href="{{ job.results_url }}">this link</a>.</p>
+
+{%- if email %}
+<p>You will be notified at {{ email }} when job results are available.</p>
+{%- endif %}
+
+<p>You can check on your job at the <a href="{{ url_for("job") }}">ModLoop queue status page</a>.</p>
+
+<p>The following loop segment(s) will be optimized: {{ loopout }} in
+protein: &gt;{{ user_name }}&lt;<br/>
+using the method of Fiser et al. (Prot. Sci. (2000) 9,1753-1773)</p>
+
+<p>The estimated execution time is ~90 min, depending on the load.</p>
+
+<p>If you experience a problem or you do not receive the results
+for more than 12 hours, please <a href="{{ url_for("contact") }}">contact us</a>.</p>
+
+<p>Thank you for using our server and good luck in your research!</p>
+
+<p>Andras Fiser</p>
 {% endblock %}
