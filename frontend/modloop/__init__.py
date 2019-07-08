@@ -1,10 +1,14 @@
 from flask import render_template, request, send_from_directory
 import saliweb.frontend
-from saliweb.frontend import get_completed_job
+from saliweb.frontend import get_completed_job, Parameter, FileParameter
 from . import submit
 
 
-app = saliweb.frontend.make_application(__name__, "##CONFIG##")
+parameters=[Parameter("name", "Job name", optional=True),
+            FileParameter("pdb", "PDB file to be refined"),
+            Parameter("modkey", "MODELLER license key"),
+            Parameter("loops", "Loops to be refined")]
+app = saliweb.frontend.make_application(__name__, "##CONFIG##", parameters)
 
 
 @app.route('/')
@@ -38,7 +42,7 @@ def job():
 @app.route('/job/<name>')
 def results(name):
     job = get_completed_job(name, request.args.get('passwd'))
-    return render_template('results.html', job=job)
+    return saliweb.frontend.render_results_template('results.html', job=job)
 
 
 @app.route('/job/<name>/<path:fp>')
