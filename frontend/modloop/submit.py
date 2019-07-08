@@ -4,11 +4,11 @@ import re
 
 
 def handle_new_job():
-    user_pdb_name = request.files["pdb"]
+    user_pdb_name = request.files.get("pdb")
     user_name = request.form.get("name", "")
     email = request.form.get("email")
-    modkey = request.form["modkey"]
-    loops = request.form["loops"]
+    modkey = request.form.get("modkey")
+    loops = request.form.get("loops")
 
     saliweb.frontend.check_email(email, required=False)
     saliweb.frontend.check_modeller_key(modkey)
@@ -47,7 +47,7 @@ def handle_new_job():
 
 def check_loop_selection(loops):
     """Check for a loop selection"""
-    if loops == "":
+    if not loops:
         raise saliweb.frontend.InputValidationError(
             "No loop segments were specified!")
 
