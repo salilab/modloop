@@ -1,5 +1,6 @@
 from flask import render_template, request, send_from_directory
 import saliweb.frontend
+import os
 from saliweb.frontend import get_completed_job, Parameter, FileParameter
 from . import submit
 
@@ -42,7 +43,12 @@ def job():
 @app.route('/job/<name>')
 def results(name):
     job = get_completed_job(name, request.args.get('passwd'))
-    return saliweb.frontend.render_results_template('results.html', job=job)
+    # Determine whether the job completed successfully
+    if os.path.exists(job.get_path('output.pdb')):
+        template = 'results_ok.html'
+    else:
+        template = 'results_failed.html'
+    return saliweb.frontend.render_results_template(template, job=job)
 
 
 @app.route('/job/<name>/<path:fp>')

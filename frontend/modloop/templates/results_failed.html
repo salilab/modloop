@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+
+{% block title %}ModLoop Results{% endblock %}
+
+{% block body %}
+<p>Your ModLoop job '<b>{{ job.name }}</b>' failed to produce any output models.
+</p>
+
+<p>This is usually caused by incorrect inputs (e.g. corrupt PDB file,
+incorrect loop selection).</p>
+
+<p>For a discussion of some common input errors, please see the
+<a href="{{ url_for("help", _anchor="errors") }}">help page</a>.</p>
+
+<p>For more information, you can <a href="{{ job.get_results_file_url('failure.log') }}">download the MODELLER log file</a>.
+If the problem is not clear from this log, please
+<a href="{{ url_for("contact") }}">contact us</a> for further assistance.</p>
+{% endblock %}
