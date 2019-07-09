@@ -1,4 +1,4 @@
-from flask import request, render_template
+from flask import request
 import saliweb.frontend
 import re
 
@@ -41,8 +41,9 @@ def handle_new_job():
                        for (sr, si, er, ei) in zip(start_res, start_id,
                                                    end_res, end_id))
 
-    return render_template('submit.html', loopout=loopout, user_name=user_name,
-                           email=email, job=job)
+    return saliweb.frontend.render_submit_template(
+        'submit.html', loopout=loopout, user_name=user_name,
+        email=email, job=job)
 
 
 def check_loop_selection(loops):
