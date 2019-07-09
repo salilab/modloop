@@ -5,17 +5,13 @@
 {%- endblock %}
 
 {% block navigation %}
-{% if g.user %}
-<a href="https://modbase.compbio.ucsf.edu/scgi/server.cgi">Current User: {{ g.user.name }}</a>&nbsp;&bull;&nbsp;
-<a href="https://modbase.compbio.ucsf.edu/scgi/server.cgi?logout=true">Logout</a>&nbsp;&bull;&nbsp;
-{% else %}
-<a href="https://modbase.compbio.ucsf.edu/scgi/server.cgi">Login</a>&nbsp;&bull;&nbsp;
-{% endif %}
-<a href="{{ url_for("index") }}">ModLoop Home</a>&nbsp;&bull;&nbsp;
-<a href="{{ url_for("job") }}">Current ModLoop queue</a>&nbsp;&bull;&nbsp;
-<a href="{{ url_for("help") }}">Help</a>&nbsp;&bull;&nbsp;
-<a href="{{ url_for("download") }}">Download</a>&nbsp;&bull;&nbsp;
-<a href="{{ url_for("contact") }}">Contact</a>
+{{ get_navigation_links(
+       [(url_for("index"), "ModLoop Home"),
+        (url_for("job"), "Current ModLoop queue"),
+        (url_for("help"), "Help"),
+        (url_for("download"), "Download"),
+        (url_for("contact"), "Contact")])
+}}
 {% endblock %}
 
 {% block sidebar %}
