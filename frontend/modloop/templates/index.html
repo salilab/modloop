@@ -2,6 +2,10 @@
 
 {% block title %}ModLoop{% endblock %}
 
+{%- macro help_link(anchor) -%}
+<a class="helplink" href="{{ url_for("help", _anchor=anchor) }}"><img class="helplink" src="/saliweb/img/help.jpg" alt="help" /></a>
+{%- endmacro %}
+
 {% block body %}
 <h2 align="center">ModLoop: Modeling of Loops in Protein Structures</h2>
 
@@ -19,35 +23,35 @@
     </tr>
     <tr>
       <td>
-        <h3>General information <a class="helplink" onclick="launchHelp('http://modbase.compbio.ucsf.edu/modloop/help.cgi?type=help&amp;style=helplink#general'); return false;" href="http://modbase.compbio.ucsf.edu/modloop/help.cgi?type=help&amp;style=helplink#general"><img class="helplink" src="/saliweb/img/help.jpg" alt="help" /></a></h3>
+        <h3>General information {{ help_link("general") }}</h3>
       </td>
     </tr>
     <tr>
-      <td>Email address (optional) <a class="helplink" onclick="launchHelp('http://modbase.compbio.ucsf.edu/modloop/help.cgi?type=help&amp;style=helplink#email'); return false;" href="http://modbase.compbio.ucsf.edu/modloop/help.cgi?type=help&amp;style=helplink#email"><img class="helplink" src="/saliweb/img/help.jpg" alt="help" /></a>
+      <td>Email address (optional) {{ help_link("email") }}
       </td>
       <td><input type="text" name="email" value="{{ g.user.email }}" size="5" class="wide" />
       </td>
     </tr>
     <tr>
-      <td>Modeller license key <a class="helplink" onclick="launchHelp('http://modbase.compbio.ucsf.edu/modloop/help.cgi?type=help&amp;style=helplink#modkey'); return false;" href="http://modbase.compbio.ucsf.edu/modloop/help.cgi?type=help&amp;style=helplink#modkey"><img class="helplink" src="/saliweb/img/help.jpg" alt="help" /></a>
+      <td>Modeller license key {{ help_link("modkey") }}
       </td>
       <td><input type="text" name="modkey"  size="5" class="wide" />
       </td>
     </tr>
     <tr>
-      <td>Upload coordinate file <a class="helplink" onclick="launchHelp('http://modbase.compbio.ucsf.edu/modloop/help.cgi?type=help&amp;style=helplink#file'); return false;" href="http://modbase.compbio.ucsf.edu/modloop/help.cgi?type=help&amp;style=helplink#file"><img class="helplink" src="/saliweb/img/help.jpg" alt="help" /></a> <br />
+      <td>Upload coordinate file {{ help_link("file") }}
       </td>
       <td><input type="file" name="pdb"  />
       </td>
     </tr>
     <tr>
-      <td><h3>Enter loop segments <a class="helplink" onclick="launchHelp('http://modbase.compbio.ucsf.edu/modloop/help.cgi?type=help&amp;style=helplink#loop'); return false;" href="http://modbase.compbio.ucsf.edu/modloop/help.cgi?type=help&amp;style=helplink#loop"><img class="helplink" src="/saliweb/img/help.jpg" alt="help" /></a></h3>
+      <td><h3>Enter loop segments {{ help_link("loop") }}</h3>
       </td>
       <td><textarea name="loops"  rows="10" cols="20" class="loopsegs"></textarea>
       </td>
     </tr>
     <tr>
-      <td><h3>Name your model <a class="helplink" onclick="launchHelp('http://modbase.compbio.ucsf.edu/modloop/help.cgi?type=help&amp;style=helplink#name'); return false;" href="http://modbase.compbio.ucsf.edu/modloop/help.cgi?type=help&amp;style=helplink#name"><img class="helplink" src="/saliweb/img/help.jpg" alt="help" /></a></h3>
+      <td><h3>Name your model {{ help_link("name") }}</h3>
       </td>
       <td><input type="text" name="name" value="loop" size="9" class="wide" />
       </td>
