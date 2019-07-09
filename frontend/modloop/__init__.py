@@ -1,4 +1,4 @@
-from flask import render_template, request, send_from_directory
+from flask import render_template, request, send_from_directory, abort
 import saliweb.frontend
 import os
 from saliweb.frontend import get_completed_job, Parameter, FileParameter
@@ -54,4 +54,7 @@ def results(name):
 @app.route('/job/<name>/<path:fp>')
 def results_file(name, fp):
     job = get_completed_job(name, request.args.get('passwd'))
-    return send_from_directory(job.directory, fp)
+    if fp in ('output.pdb', 'failure.log', 'loop.py'):
+        return send_from_directory(job.directory, fp)
+    else:
+        abort(404)

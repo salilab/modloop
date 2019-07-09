@@ -1,2 +1,3 @@
 SConscript('backend/SConscript')
 SConscript('frontend/SConscript')
+SConscript('pyfrontend/SConscript')
