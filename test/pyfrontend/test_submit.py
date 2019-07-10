@@ -4,7 +4,8 @@ import os
 import re
 
 # Import the modloop frontend with mocks
-modloop = saliweb.test.import_mocked_frontend("modloop")
+modloop = saliweb.test.import_mocked_frontend("modloop", __file__,
+                                              '../../frontend')
 
 
 class Tests(saliweb.test.TestCase):

@@ -9,7 +9,7 @@ parameters=[Parameter("name", "Job name", optional=True),
             FileParameter("pdb", "PDB file to be refined"),
             Parameter("modkey", "MODELLER license key"),
             Parameter("loops", "Loops to be refined")]
-app = saliweb.frontend.make_application(__name__, "##CONFIG##", parameters)
+app = saliweb.frontend.make_application(__name__, parameters)
 
 
 @app.route('/')
