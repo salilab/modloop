@@ -1,3 +1,0 @@
-Import('env')
-
-env.RunPerlTests(Glob("*.pl"))

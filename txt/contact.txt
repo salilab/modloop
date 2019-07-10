@@ -1,2 +1,0 @@
-<p>Please address inquiries to:<br />
-<script type="text/javascript">escramble('modloop','salilab.org')</script></p>
