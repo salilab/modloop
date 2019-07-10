@@ -13,6 +13,8 @@ class Tests(saliweb.test.TestCase):
 
     def test_submit_page(self):
         """Test submit page"""
+        incoming = saliweb.test.TempDir()
+        modloop.app.config['DIRECTORIES_INCOMING'] = incoming.tmpdir
         c = modloop.app.test_client()
         rv = c.post('/job')
         self.assertEqual(rv.status_code, 400)  # no license key
