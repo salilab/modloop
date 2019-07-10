@@ -19,7 +19,7 @@ install:
   - export PERL5LIB=~/perl5/lib/perl5
   - export PYTHONPATH=$(echo $(dirname $(which python))/../lib/python*/site-packages)
   - export PATH=~/perl5/bin:$PATH
-  - pip install coverage
+  - pip install coverage flask
   - curl -L https://cpanmin.us/ -o cpanm && chmod a+x cpanm
   - ./cpanm --local-lib=~/perl5 --quiet --notest --skip-satisfied Devel::Cover::Report::Codecov Test::Exception Test::Output Devel::Cover MIME::Lite
   - git clone --depth=5 https://github.com/salilab/saliweb
