@@ -7,7 +7,7 @@ Help(vars.GenerateHelpText(env))
 env.InstallAdminTools()
 
 Export('env')
-SConscript('python/modloop/SConscript')
+SConscript('backend/modloop/SConscript')
 SConscript('html/SConscript')
 SConscript('frontend/modloop/SConscript')
 SConscript('test/SConscript')
