@@ -30,10 +30,11 @@ class Tests(saliweb.test.TestCase):
         with saliweb.test.make_frontend_job('testjob2') as j:
             j.make_file("output.pdb")
             c = modloop.app.test_client()
-            rv = c.get('/job/testjob2?passwd=%s' % j.passwd)
-            r = re.compile('Job.*testjob.*has completed.*output\.pdb.*'
-                           'Download output PDB', re.MULTILINE | re.DOTALL)
-            self.assertRegexpMatches(rv.data, r)
+            for endpoint in ('job', 'results.cgi'):
+                rv = c.get('/%s/testjob2?passwd=%s' % (endpoint, j.passwd))
+                r = re.compile('Job.*testjob.*has completed.*output\.pdb.*'
+                               'Download output PDB', re.MULTILINE | re.DOTALL)
+                self.assertRegexpMatches(rv.data, r)
 
     def test_failed_job(self):
         """Test display of failed job"""
