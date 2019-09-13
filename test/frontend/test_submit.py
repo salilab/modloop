@@ -35,20 +35,21 @@ class Tests(saliweb.test.TestCase):
                      "ATOM      2  CA  ALA     1      26.711  14.576   5.091\n")
 
         # Successful submission (no email)
-        data['pdb'] = open(pdbf)
+        data['pdb'] = open(pdbf, 'rb')
         rv = c.post('/job', data=data)
         self.assertEqual(rv.status_code, 200)
-        r = re.compile('Your job has been submitted.*You can check on your job',
+        r = re.compile(b'Your job has been submitted.*'
+                       b'You can check on your job',
                        re.MULTILINE | re.DOTALL)
         self.assertRegexpMatches(rv.data, r)
 
         # Successful submission (with email)
         data['email'] = 'test@test.com'
-        data['pdb'] = open(pdbf)
+        data['pdb'] = open(pdbf, 'rb')
         rv = c.post('/job', data=data)
         self.assertEqual(rv.status_code, 200)
-        r = re.compile('Your job has been submitted.*You will be notified.*'
-                       'You can check on your job', re.MULTILINE | re.DOTALL)
+        r = re.compile(b'Your job has been submitted.*You will be notified.*'
+                       b'You can check on your job', re.MULTILINE | re.DOTALL)
         self.assertRegexpMatches(rv.data, r)
 
     def test_check_loop_selection(self):
@@ -117,15 +118,15 @@ class Tests(saliweb.test.TestCase):
                         % (chain, resid))
 
         # Successful read
-        with open(pdb) as fh:
+        with open(pdb, 'rb') as fh:
             contents = modloop.submit.read_pdb_file(fh, 2, [1, 1], [' ', 'A'],
                                                     [5, 5], [' ', 'A'])
-        r = re.compile('^ATOM\s+1\s+CA\s+ALA     1.*ATOM\s+1\s+CA\s+ALA A  10',
+        r = re.compile(b'^ATOM\s+1\s+CA\s+ALA     1.*ATOM\s+1\s+CA\s+ALA A  10',
                        re.MULTILINE | re.DOTALL)
-        self.assertRegexpMatches("".join(contents), r)
+        self.assertRegexpMatches(b"".join(contents), r)
 
         # Loop not found in ATOM records
-        with open(pdb) as fh:
+        with open(pdb, 'rb') as fh:
             self.assertRaises(saliweb.frontend.InputValidationError,
                 modloop.submit.read_pdb_file, fh, 2, [1, 1], [' ', 'A'],
                 [5, 15], [' ', 'A'])

@@ -32,8 +32,8 @@ class Tests(saliweb.test.TestCase):
             c = modloop.app.test_client()
             for endpoint in ('job', 'results.cgi'):
                 rv = c.get('/%s/testjob2?passwd=%s' % (endpoint, j.passwd))
-                r = re.compile('Job.*testjob.*has completed.*output\.pdb.*'
-                               'Download output PDB', re.MULTILINE | re.DOTALL)
+                r = re.compile(b'Job.*testjob.*has completed.*output\.pdb.*'
+                               b'Download output PDB', re.MULTILINE | re.DOTALL)
                 self.assertRegexpMatches(rv.data, r)
 
     def test_failed_job(self):
@@ -42,10 +42,10 @@ class Tests(saliweb.test.TestCase):
             c = modloop.app.test_client()
             rv = c.get('/job/testjob3?passwd=%s' % j.passwd)
             r = re.compile(
-                'Your ModLoop job.*testjob.*failed to produce any output.*'
-                'please see the.*#errors.*help page.*For more information, '
-                'you can.*failure\.log.*download the MODELLER log file.*'
-                'contact us', re.MULTILINE | re.DOTALL)
+                b'Your ModLoop job.*testjob.*failed to produce any output.*'
+                b'please see the.*#errors.*help page.*For more information, '
+                b'you can.*failure\.log.*download the MODELLER log file.*'
+                b'contact us', re.MULTILINE | re.DOTALL)
             self.assertRegexpMatches(rv.data, r)
 
 

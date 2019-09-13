@@ -1,6 +1,8 @@
 from flask import request
 import saliweb.frontend
 import re
+import itertools
+import sys
 
 
 def handle_new_job():
@@ -27,7 +29,7 @@ def handle_new_job():
     job = saliweb.frontend.IncomingJob(user_name)
 
     # Write PDB input
-    with open(job.get_path('input.pdb'), 'w') as fh:
+    with open(job.get_path('input.pdb'), 'wb') as fh:
         fh.writelines(user_pdb)
 
     # Write loop selection
@@ -127,16 +129,20 @@ def read_pdb_file(pdb, loops, start_res, start_id, end_res, end_id):
         return "%s:%s" % (str(residue).replace(' ', ''), chain.replace(' ', ''))
 
     # start/end loop residues
-    residues = set(make_residue_id(chain_id, res)
-                   for (chain_id, res) in zip(start_id, start_res)
-                                          + zip(end_id, end_res))
+    residues = set(make_residue_id(chain_id, res) for (chain_id, res)
+                   in itertools.chain(zip(start_id, start_res),
+                                      zip(end_id, end_res)))
 
     file_contents = pdb.readlines()
-    atom_re = re.compile('ATOM.................(.)(....)')
+    atom_re = re.compile(b'ATOM.................(.)(....)')
     for line in file_contents:
         m = atom_re.match(line)
         if m:
-            residues.discard(make_residue_id(m.group(1), m.group(2)))
+            chain, res = m.group(1), m.group(2)
+            if sys.version_info[0] >= 3:
+                chain = chain.decode('ascii')
+                res = res.decode('ascii')
+            residues.discard(make_residue_id(chain, res))
     if len(residues) > 0:
         raise saliweb.frontend.InputValidationError(
             "The following residues were not found in ATOM records in"
