@@ -1,3 +1,4 @@
+from __future__ import print_function
 import saliweb.backend
 import tarfile
 import glob
@@ -65,9 +66,9 @@ def make_output_pdb(best_model, out, jobname, loops, num_models):
         residue_range.append("REMARK        %s:%s-%s:%s"
                              % tuple(loops[i:i + 4]))
     looplist = "\n".join(residue_range)
-    fin = open(best_model)
-    fout = open(out, 'w')
-    print >> fout, """REMARK
+    with open(best_model) as fin:
+        with open(out, 'w') as fout:
+             fout.write("""REMARK
 REMARK     Dear User,
 REMARK
 REMARK     Coordinates for the lowest energy model (out of %(num_models)d sampled)
@@ -91,8 +92,9 @@ REMARK
 REMARK     with best regards,
 REMARK     Andras Fiser
 REMARK
-REMARK""" % locals()
-    fout.writelines(fin)
+REMARK
+""" % locals())
+             fout.writelines(fin)
 
 
 def make_python_script(loops, input_pdb, sequence):

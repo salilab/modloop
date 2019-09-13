@@ -1,3 +1,4 @@
+from __future__ import print_function
 import unittest
 import modloop
 import saliweb.backend
@@ -14,7 +15,8 @@ class PostProcessTests(saliweb.test.TestCase):
         t = saliweb.test.RunInTempDir()
         in_pdbs = ['test1', 'test2.pdb']
         for pdb in in_pdbs:
-            print >> open(pdb, 'w'), "test"
+            with open(pdb, 'w') as fh:
+                fh.write("test\n")
         modloop.compress_output_pdbs(in_pdbs)
         # Original PDB files should have been deleted
         for pdb in in_pdbs:
@@ -27,11 +29,14 @@ class PostProcessTests(saliweb.test.TestCase):
     def test_get_best_model(self):
         """Check get_best_model function"""
         t = saliweb.test.RunInTempDir()
-        print >> open('test1.pdb', 'w'), \
-               "REMARK   1 MODELLER OBJECTIVE FUNCTION:       309.6122\ndummy"
-        print >> open('test2.pdb', 'w'), \
-               "dummy\nREMARK   1 MODELLER OBJECTIVE FUNCTION:      -457.3816"
-        open('empty.pdb', 'w')
+        with open('test1.pdb', 'w') as fh:
+            fh.write("REMARK   1 MODELLER OBJECTIVE FUNCTION:       309.6122\n"
+                     "dummy\n")
+        with open('test2.pdb', 'w') as fh:
+            fh.write("dummy\n"
+                     "REMARK   1 MODELLER OBJECTIVE FUNCTION:      -457.3816\n")
+        with open('empty.pdb', 'w') as fh:
+            pass
         self.assertEqual(modloop.get_best_model([]), None)
         self.assertEqual(modloop.get_best_model(['empty.pdb']), None)
         self.assertEqual(modloop.get_best_model(['test1.pdb']), 'test1.pdb')
@@ -43,7 +48,8 @@ class PostProcessTests(saliweb.test.TestCase):
     def test_make_output_pdb(self):
         """Check make_output_pdb function"""
         t = saliweb.test.RunInTempDir()
-        print >> open('test1.pdb', 'w'), "best model"
+        with open('test1.pdb', 'w') as fh:
+            fh.write("best model\n")
         modloop.make_output_pdb('test1.pdb', 'output.pdb', 'myjob',
                                 ('1', 'A', '10', 'A', '20', 'B', '30', 'B'), 10)
         contents = open('output.pdb').read()
