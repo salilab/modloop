@@ -1,6 +1,6 @@
 sudo: false
 language: python
-dist: xenial
+dist: bionic
 python:
   - 2.7
   - 3.6
