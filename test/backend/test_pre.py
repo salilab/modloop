@@ -15,11 +15,12 @@ class PreProcessTests(saliweb.test.TestCase):
         t = saliweb.test.RunInTempDir()
         s = modloop.make_python_script(('1', 'A', '10', 'A'), 'test.pdb',
                                        'myseq')
-        self.assert_(re.search("def select_loop_atoms\(.*"
-                               "self\.residue_range\('1:A', '10:A'\).*"
-                               "MyLoop\(env, inimodel='test.pdb',.*"
-                               "sequence='myseq'", s, re.DOTALL | re.MULTILINE),
-                     'Python script does not match regex: ' + s)
+        self.assertTrue(re.search(
+            r"def select_loop_atoms\(.*"
+            r"self\.residue_range\('1:A', '10:A'\).*"
+            r"MyLoop\(env, inimodel='test.pdb',.*"
+            r"sequence='myseq'", s, re.DOTALL | re.MULTILINE),
+            'Python script does not match regex: ' + s)
         # Make sure that the script contains no syntax errors
         with open('test.py', 'w') as fh:
             fh.write(s)
@@ -32,8 +33,7 @@ class PreProcessTests(saliweb.test.TestCase):
         """Check make_sge_script function"""
         s = modloop.make_sge_script(saliweb.backend.SGERunner, 'myjob',
                                     '/foo/bar', 300)
-        self.assert_(isinstance(s, saliweb.backend.SGERunner),
-                     "SGERunner not returned")
+        self.assertIsInstance(s, saliweb.backend.SGERunner)
 
 if __name__ == '__main__':
     unittest.main()

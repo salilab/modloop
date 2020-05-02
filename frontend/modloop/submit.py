@@ -66,7 +66,7 @@ def parse_loop_selection(loops):
     """Split out loop selection and check it"""
 
     # capitalize and remove spaces
-    loops = re.sub('\s+', '', loops.upper())
+    loops = re.sub(r'\s+', '', loops.upper())
     # replace null chain IDs with a single space
     loops = loops.replace("::", ": :")
 

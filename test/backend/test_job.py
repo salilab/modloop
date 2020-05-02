@@ -13,10 +13,12 @@ class JobTests(saliweb.test.TestCase):
         j = self.make_test_job(modloop.Job, 'RUNNING')
         d = saliweb.test.RunInDir(j.directory)
         # Invalid characters in loops.tsv
-        open('loops.tsv', 'w').write('1\t%\t5\tA\t')
+        with open('loops.tsv', 'w') as fh:
+            fh.write('1\t%\t5\tA\t')
         self.assertRaises(saliweb.backend.SanityError, j.run)
         # Wrong number of fields in loops.tsv
-        open('loops.tsv', 'w').write('1\tA')
+        with open('loops.tsv', 'w') as fh:
+            fh.write('1\tA')
         self.assertRaises(saliweb.backend.SanityError, j.run)
 
     def test_run_ok(self):
@@ -24,12 +26,13 @@ class JobTests(saliweb.test.TestCase):
         j = self.make_test_job(modloop.Job, 'RUNNING')
         d = saliweb.test.RunInDir(j.directory)
         # Negative residue numbers should be OK
-        open('loops.tsv', 'w').write('1\tA\t-5\tA')
+        with open('loops.tsv', 'w') as fh:
+            fh.write('1\tA\t-5\tA')
         cls = j.run()
-        self.assert_(isinstance(cls, saliweb.backend.SGERunner),
-                     "SGERunner not returned")
+        self.assertIsInstance(cls, saliweb.backend.SGERunner)
         # Underscore OK for chain ID
-        open('loops.tsv', 'w').write('1\t_\t5\t_')
+        with open('loops.tsv', 'w') as fh:
+            fh.write('1\t_\t5\t_')
         j.run()
         os.unlink('loop.py')
 

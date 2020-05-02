@@ -52,13 +52,14 @@ class PostProcessTests(saliweb.test.TestCase):
             fh.write("best model\n")
         modloop.make_output_pdb('test1.pdb', 'output.pdb', 'myjob',
                                 ('1', 'A', '10', 'A', '20', 'B', '30', 'B'), 10)
-        contents = open('output.pdb').read()
-        r = re.compile('^REMARK\nREMARK\s+Dear User.*'
-                       '^REMARK\s+of your protein: ``myjob\'\'.*'
-                       'listed below:.*^REMARK\s+1:A-10:A.*'
-                       '^REMARK\s+20:B-30:B.*best model$',
+        with open('output.pdb') as fh:
+            contents = fh.read()
+        r = re.compile(r'^REMARK\nREMARK\s+Dear User.*'
+                       r'^REMARK\s+of your protein: ``myjob\'\'.*'
+                       r'listed below:.*^REMARK\s+1:A-10:A.*'
+                       r'^REMARK\s+20:B-30:B.*best model$',
                        re.MULTILINE | re.DOTALL)
-        self.assert_(r.match(contents),
+        self.assertTrue(r.match(contents),
                      'File contents:\n%s\ndo not match regex' % contents)
         os.unlink('output.pdb')
 

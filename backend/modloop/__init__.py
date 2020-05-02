@@ -32,15 +32,15 @@ def get_best_model(pdbs):
     best_pdb = best_score = None
     objfunc_re = re.compile('OBJECTIVE FUNCTION:(.*)$')
     for pdb in pdbs:
-        f = open(pdb)
-        for line in f:
-            m = objfunc_re.search(line)
-            if m:
-                score = float(m.group(1))
-                if best_pdb is None or score < best_score:
-                    best_pdb = pdb
-                    best_score = score
-                break
+        with open(pdb) as f:
+            for line in f:
+                m = objfunc_re.search(line)
+                if m:
+                    score = float(m.group(1))
+                    if best_pdb is None or score < best_score:
+                        best_pdb = pdb
+                        best_score = score
+                    break
     return best_pdb
 
 
@@ -52,9 +52,10 @@ def make_failure_log(logname):
     logs = glob.glob("*.log")
     if len(logs) > 0:
         log = logs[0]
-        for line in open(log):
-            if line.startswith('*** ABNORMAL TERMINATION of Modeller'):
-                raise AssertionError("Modeller assertion failure in " + log)
+        with open(log) as fh:
+            for line in fh:
+                if line.startswith('*** ABNORMAL TERMINATION of Modeller'):
+                    raise AssertionError("Modeller assertion failure in " + log)
         os.symlink(log, logname)
     else:
         raise NoLogError("No log files produced")
@@ -181,7 +182,8 @@ class Job(saliweb.backend.Job):
     runnercls = saliweb.backend.SaliSGERunner
 
     def run(self):
-        loops = open('loops.tsv').read().rstrip('\r\n')
+        with open('loops.tsv') as fh:
+            loops = fh.read().rstrip('\r\n')
         if not re.match('[A-Za-z0-9\t _-]+$', loops):
             raise saliweb.backend.SanityError("Invalid character in loops.tsv")
         loops = loops.split('\t')
@@ -189,7 +191,8 @@ class Job(saliweb.backend.Job):
             raise saliweb.backend.SanityError(
                 "loops should be a multiple of 4")
         p = make_python_script(loops, 'input.pdb', 'loop')
-        open('loop.py', 'w').write(p)
+        with open('loop.py', 'w') as fh:
+            fh.write(p)
         return make_sge_script(self.runnercls, self.name, self.directory,
                                self.number_of_tasks)
 
@@ -205,7 +208,8 @@ class Job(saliweb.backend.Job):
                                             self.number_of_tasks,
                                             self.required_completed_tasks))
             else:
-                loops = open('loops.tsv').read().rstrip('\r\n').split('\t')
+                with open('loops.tsv') as fh:
+                    loops = fh.read().rstrip('\r\n').split('\t')
                 make_output_pdb(best_model, 'output.pdb', self.name, loops,
                                 len(output_pdbs))
                 compress_output_pdbs(output_pdbs)
