@@ -122,7 +122,7 @@ class Tests(saliweb.test.TestCase):
             contents = modloop.submit.read_pdb_file(fh, 2, [1, 1], [' ', 'A'],
                                                     [5, 5], [' ', 'A'])
         r = re.compile(
-                rb'^ATOM\s+1\s+CA\s+ALA     1.*ATOM\s+1\s+CA\s+ALA A  10',
+                b'^ATOM\\s+1\\s+CA\\s+ALA     1.*ATOM\\s+1\\s+CA\\s+ALA A  10',
                 re.MULTILINE | re.DOTALL)
         self.assertRegex(b"".join(contents), r)
 
