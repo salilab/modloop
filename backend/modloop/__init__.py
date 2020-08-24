@@ -155,6 +155,7 @@ mkdir -p $tmpdir && cd $tmpdir || exit 1
 # Get input files
 cp %(directory)s/$input %(directory)s/input.pdb .
 
+module load Sali
 module load modeller/9.24
 python $input ${SGE_TASK_ID} >& $output
 
@@ -170,7 +171,7 @@ fi
 rm -rf $tmpdir
 """ % locals()
     r = runnercls(script)
-    r.set_sge_options("-o output.error -j y -l scratch=1G -l netappsali=1G "
+    r.set_sge_options("-o output.error -j y -l h_rt=24:00:00 -l scratch=1G "
                       "-r y -N loop -p -4 -t 1-%d" % number_of_tasks)
     return r
 
@@ -179,7 +180,7 @@ class Job(saliweb.backend.Job):
     number_of_tasks = 300
     required_completed_tasks = 280
 
-    runnercls = saliweb.backend.SaliSGERunner
+    runnercls = saliweb.backend.WyntonSGERunner
 
     def run(self):
         with open('loops.tsv') as fh:
