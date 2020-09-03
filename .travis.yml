@@ -1,15 +1,10 @@
 sudo: false
 language: python
-dist: bionic
+dist: focal
 python:
-  - 2.7
   - 3.6
   - 3.7
   - 3.8
-matrix:
-  include:
-    - dist: trusty
-      python: 2.6
 addons:
   apt:
     packages:
