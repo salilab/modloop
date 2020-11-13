@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/salilab/modloop.svg?branch=master)](https://travis-ci.org/salilab/modloop)
+[![Build Status](https://travis-ci.com/salilab/modloop.svg?branch=master)](https://travis-ci.com/salilab/modloop)
 [![codecov](https://codecov.io/gh/salilab/modloop/branch/master/graph/badge.svg)](https://codecov.io/gh/salilab/modloop)
 [![Code Climate](https://codeclimate.com/github/salilab/modloop/badges/gpa.svg)](https://codeclimate.com/github/salilab/modloop)
 
