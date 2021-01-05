@@ -1,5 +1,5 @@
-[![Build Status](https://github.com/salilab/modloop/workflows/build/badge.svg?branch=master)](https://github.com/salilab/modloop/actions?query=workflow%3Abuild)
-[![codecov](https://codecov.io/gh/salilab/modloop/branch/master/graph/badge.svg)](https://codecov.io/gh/salilab/modloop)
+[![Build Status](https://github.com/salilab/modloop/workflows/build/badge.svg?branch=main)](https://github.com/salilab/modloop/actions?query=workflow%3Abuild)
+[![codecov](https://codecov.io/gh/salilab/modloop/branch/main/graph/badge.svg)](https://codecov.io/gh/salilab/modloop)
 [![Code Climate](https://codeclimate.com/github/salilab/modloop/badges/gpa.svg)](https://codeclimate.com/github/salilab/modloop)
 
 This is the source code for [ModLoop](https://salilab.org/modloop/), a web
