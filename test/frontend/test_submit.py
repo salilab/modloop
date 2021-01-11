@@ -20,7 +20,7 @@ class Tests(saliweb.test.TestCase):
         self.assertEqual(rv.status_code, 400)  # no license key
 
         modkey = saliweb.test.get_modeller_key()
-        data={'modkey': modkey}
+        data = {'modkey': modkey}
         rv = c.post('/job', data=data)
         self.assertEqual(rv.status_code, 400)  # no loops
 
@@ -31,8 +31,9 @@ class Tests(saliweb.test.TestCase):
         t = saliweb.test.TempDir()
         pdbf = os.path.join(t.tmpdir, 'test.pdb')
         with open(pdbf, 'w') as fh:
-            fh.write("REMARK\n"
-                     "ATOM      2  CA  ALA     1      26.711  14.576   5.091\n")
+            fh.write(
+                "REMARK\n"
+                "ATOM      2  CA  ALA     1      26.711  14.576   5.091\n")
 
         # Successful submission (no email)
         data['pdb'] = open(pdbf, 'rb')
@@ -75,35 +76,43 @@ class Tests(saliweb.test.TestCase):
         self.assertEqual(end_id, [' ', 'A'])
 
         # Wrong number of colons
-        self.assertRaises(saliweb.frontend.InputValidationError,
+        self.assertRaises(
+            saliweb.frontend.InputValidationError,
             modloop.submit.parse_loop_selection, '1::5::16:A:30:')
 
         # Loop that spans chains
-        self.assertRaises(saliweb.frontend.InputValidationError,
+        self.assertRaises(
+            saliweb.frontend.InputValidationError,
             modloop.submit.parse_loop_selection, '1::5::16:A:20:B:')
 
         # Loop too long
-        self.assertRaises(saliweb.frontend.InputValidationError,
+        self.assertRaises(
+            saliweb.frontend.InputValidationError,
             modloop.submit.parse_loop_selection, '1::50::16:A:20:B:')
 
         # Non-numeric residue
-        self.assertRaises(saliweb.frontend.InputValidationError,
+        self.assertRaises(
+            saliweb.frontend.InputValidationError,
             modloop.submit.parse_loop_selection, '1::5A::16:A:20:B:')
 
         # Loop of negative length
-        self.assertRaises(saliweb.frontend.InputValidationError,
+        self.assertRaises(
+            saliweb.frontend.InputValidationError,
             modloop.submit.parse_loop_selection, '10::5::16:A:20:B:')
 
         # Too many residues
-        self.assertRaises(saliweb.frontend.InputValidationError,
+        self.assertRaises(
+            saliweb.frontend.InputValidationError,
             modloop.submit.parse_loop_selection, '1::10::20:A:31:A:')
 
         # No residues
-        self.assertRaises(saliweb.frontend.InputValidationError,
+        self.assertRaises(
+            saliweb.frontend.InputValidationError,
             modloop.submit.parse_loop_selection, '')
 
         # Empty first residue
-        self.assertRaises(saliweb.frontend.InputValidationError,
+        self.assertRaises(
+            saliweb.frontend.InputValidationError,
             modloop.submit.parse_loop_selection, '::10::20:A:31:A:')
 
     def test_read_pdb_file(self):
@@ -112,8 +121,9 @@ class Tests(saliweb.test.TestCase):
         pdb = os.path.join(t.tmpdir, 'test.pdb')
         with open(pdb, 'w') as fh:
             for chain in (' ', 'A'):
-                for resid in range(1,11):
-                    fh.write("ATOM      1  CA  ALA %1s%4d      "
+                for resid in range(1, 11):
+                    fh.write(
+                        "ATOM      1  CA  ALA %1s%4d      "
                         "18.511  -1.416  15.632  1.00  6.84           C\n"
                         % (chain, resid))
 
@@ -128,7 +138,8 @@ class Tests(saliweb.test.TestCase):
 
         # Loop not found in ATOM records
         with open(pdb, 'rb') as fh:
-            self.assertRaises(saliweb.frontend.InputValidationError,
+            self.assertRaises(
+                saliweb.frontend.InputValidationError,
                 modloop.submit.read_pdb_file, fh, 2, [1, 1], [' ', 'A'],
                 [5, 15], [' ', 'A'])
 

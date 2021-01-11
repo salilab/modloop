@@ -5,10 +5,10 @@ from saliweb.frontend import get_completed_job, Parameter, FileParameter
 from . import submit
 
 
-parameters=[Parameter("name", "Job name", optional=True),
-            FileParameter("pdb", "PDB file to be refined"),
-            Parameter("modkey", "MODELLER license key"),
-            Parameter("loops", "Loops to be refined")]
+parameters = [Parameter("name", "Job name", optional=True),
+              FileParameter("pdb", "PDB file to be refined"),
+              Parameter("modkey", "MODELLER license key"),
+              Parameter("loops", "Loops to be refined")]
 app = saliweb.frontend.make_application(__name__, parameters)
 
 

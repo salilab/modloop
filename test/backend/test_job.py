@@ -5,6 +5,7 @@ import saliweb.test
 import saliweb.backend
 import os
 
+
 class JobTests(saliweb.test.TestCase):
     """Check custom ModLoop Job class"""
 
@@ -20,6 +21,7 @@ class JobTests(saliweb.test.TestCase):
         with open('loops.tsv', 'w') as fh:
             fh.write('1\tA')
         self.assertRaises(saliweb.backend.SanityError, j.run)
+        del d
 
     def test_run_ok(self):
         """Test successful run method"""
@@ -35,6 +37,7 @@ class JobTests(saliweb.test.TestCase):
             fh.write('1\t_\t5\t_')
         j.run()
         os.unlink('loop.py')
+        del d
 
     def test_postprocess_no_models(self):
         """Test postprocess method; no models produced"""
@@ -46,6 +49,7 @@ class JobTests(saliweb.test.TestCase):
         j.postprocess()
         self.assertFalse(os.path.exists('output.pdb'))
         self.assertTrue(os.path.exists('failure.log'))
+        del d
 
     def test_postprocess_no_models_no_logs(self):
         """Test postprocess method; no models or logs produced"""
@@ -53,6 +57,7 @@ class JobTests(saliweb.test.TestCase):
         j.required_completed_tasks = 0
         d = saliweb.test.RunInDir(j.directory)
         self.assertRaises(modloop.NoLogError, j.postprocess)
+        del d
 
     def test_postprocess_no_models_assertion(self):
         """Test postprocess method; Modeller assertion failure"""
@@ -62,6 +67,7 @@ class JobTests(saliweb.test.TestCase):
         with open('1.log', 'w') as fh:
             fh.write("*** ABNORMAL TERMINATION of Modeller\n")
         self.assertRaises(modloop.AssertionError, j.postprocess)
+        del d
 
     def test_postprocess_models(self):
         """Test postprocess method; some models produced"""
@@ -69,11 +75,14 @@ class JobTests(saliweb.test.TestCase):
         j.required_completed_tasks = 0
         d = saliweb.test.RunInDir(j.directory)
         with open('loop.BL0.pdb', 'w') as fh:
-            fh.write("REMARK   1 MODELLER OBJECTIVE FUNCTION:       309.6122\n")
+            fh.write(
+                "REMARK   1 MODELLER OBJECTIVE FUNCTION:       309.6122\n")
         with open('loop.BL1.pdb', 'w') as fh:
-            fh.write("REMARK   1 MODELLER OBJECTIVE FUNCTION:      -457.3816\n")
+            fh.write(
+                "REMARK   1 MODELLER OBJECTIVE FUNCTION:      -457.3816\n")
         with open('ignored.pdb', 'w') as fh:
-            fh.write("REMARK   1 MODELLER OBJECTIVE FUNCTION:      -900.3816\n")
+            fh.write(
+                "REMARK   1 MODELLER OBJECTIVE FUNCTION:      -900.3816\n")
         with open('loops.tsv', 'w') as fh:
             fh.write('1\tA\t5\tA')
         j.postprocess()
@@ -82,16 +91,19 @@ class JobTests(saliweb.test.TestCase):
         os.unlink('ignored.pdb')
         self.assertFalse(os.path.exists('loop.BL0.pdb'))
         self.assertFalse(os.path.exists('loop.BL1.pdb'))
+        del d
 
     def test_postprocess_insufficient_models(self):
         """Test postprocess method; too few models produced"""
         j = self.make_test_job(modloop.Job, 'POSTPROCESSING')
         d = saliweb.test.RunInDir(j.directory)
         with open('loop.BL0.pdb', 'w') as fh:
-            fh.write("REMARK   1 MODELLER OBJECTIVE FUNCTION:       309.6122\n")
+            fh.write(
+                "REMARK   1 MODELLER OBJECTIVE FUNCTION:       309.6122\n")
         with open('loops.tsv', 'w') as fh:
             fh.write('1\tA\t5\tA')
         self.assertRaises(modloop.IncompleteJobError, j.postprocess)
+        del d
 
 
 if __name__ == '__main__':

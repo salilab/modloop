@@ -87,7 +87,7 @@ def parse_loop_selection(loops):
     loops = 0
     while loops*4+3 < len(loop_data) and loop_data[loops*4] != "":
         if (not loop_data[loops*4].isdigit()
-            or not loop_data[loops*4+2].isdigit()):
+                or not loop_data[loops*4+2].isdigit()):
             raise saliweb.frontend.InputValidationError(
                 "Residue indices are not numeric")
         start_res.append(int(loop_data[loops*4]))
@@ -100,8 +100,8 @@ def parse_loop_selection(loops):
         ################################
         # too long loops rejected
         if ((end_res[-1] - start_res[-1]) > 20
-            or start_id[-1] != end_id[-1]
-            or (end_res[-1] - start_res[-1]) < 0):
+                or start_id[-1] != end_id[-1]
+                or (end_res[-1] - start_res[-1]) < 0):
             raise saliweb.frontend.InputValidationError(
                 "The loop selected is too long (>20 residues) or "
                 "shorter than 1 residue or not selected properly "
@@ -126,7 +126,8 @@ def parse_loop_selection(loops):
 def read_pdb_file(pdb, loops, start_res, start_id, end_res, end_id):
     """Read in uploaded PDB file, and check loop residues"""
     def make_residue_id(chain, residue):
-        return "%s:%s" % (str(residue).replace(' ', ''), chain.replace(' ', ''))
+        return "%s:%s" % (str(residue).replace(' ', ''),
+                          chain.replace(' ', ''))
 
     # start/end loop residues
     residues = set(make_residue_id(chain_id, res) for (chain_id, res)

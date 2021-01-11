@@ -7,6 +7,7 @@ import sys
 import os
 import re
 
+
 class PreProcessTests(saliweb.test.TestCase):
     """Check preprocessing functions"""
 
@@ -28,12 +29,14 @@ class PreProcessTests(saliweb.test.TestCase):
         if sys.version_info[0] == 2:
             os.unlink('test.pyc')
         os.unlink('test.py')
+        del t
 
     def test_make_sge_script(self):
         """Check make_sge_script function"""
         s = modloop.make_sge_script(saliweb.backend.SGERunner, 'myjob',
                                     '/foo/bar', 300)
         self.assertIsInstance(s, saliweb.backend.SGERunner)
+
 
 if __name__ == '__main__':
     unittest.main()

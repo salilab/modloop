@@ -55,13 +55,14 @@ def make_failure_log(logname):
         with open(log) as fh:
             for line in fh:
                 if line.startswith('*** ABNORMAL TERMINATION of Modeller'):
-                    raise AssertionError("Modeller assertion failure in " + log)
+                    raise AssertionError(
+                        "Modeller assertion failure in " + log)
         os.symlink(log, logname)
     else:
         raise NoLogError("No log files produced")
 
 
-def make_output_pdb(best_model, out, jobname, loops, num_models):
+def make_output_pdb(best_model, out, jobname, loops, nmodel):
     residue_range = []
     for i in range(0, len(loops), 4):
         residue_range.append("REMARK        %s:%s-%s:%s"
@@ -69,10 +70,10 @@ def make_output_pdb(best_model, out, jobname, loops, num_models):
     looplist = "\n".join(residue_range)
     with open(best_model) as fin:
         with open(out, 'w') as fout:
-             fout.write("""REMARK
+            fout.write("""REMARK
 REMARK     Dear User,
 REMARK
-REMARK     Coordinates for the lowest energy model (out of %(num_models)d sampled)
+REMARK     Coordinates for the lowest energy model (out of %(nmodel)d sampled)
 REMARK     of your protein: ``%(jobname)s''  are returned with
 REMARK     the optimized loop regions, listed below:
 %(looplist)s
@@ -95,7 +96,7 @@ REMARK     Andras Fiser
 REMARK
 REMARK
 """ % locals())
-             fout.writelines(fin)
+            fout.writelines(fin)
 
 
 def make_python_script(loops, input_pdb, sequence):
