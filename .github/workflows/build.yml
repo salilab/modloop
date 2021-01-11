@@ -23,7 +23,7 @@ jobs:
         pip install coverage scons flask flake8
         git clone --depth=5 https://github.com/salilab/saliweb
         export PYTHON=`pip show coverage |grep Location|cut -b11-`
-        (cd saliweb && scons modeller_key=UNKNOWN pythondir=$PYTHON perldir=~/perl prefix=~/usr webdir=~/www install && touch $PYTHON/saliweb/frontend/config.py)
+        (cd saliweb && scons modeller_key=UNKNOWN pythondir=$PYTHON perldir=~/perl prefix=~/usr webdir=~/www install && touch $PYTHON/saliweb/frontend/config.py && rm -rf saliweb)
     - name: Test
       run: |
         scons coverage=true python=$(which python) test
