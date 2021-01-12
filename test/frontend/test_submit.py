@@ -13,45 +13,47 @@ class Tests(saliweb.test.TestCase):
 
     def test_submit_page(self):
         """Test submit page"""
-        incoming = saliweb.test.TempDir()
-        modloop.app.config['DIRECTORIES_INCOMING'] = incoming.tmpdir
-        c = modloop.app.test_client()
-        rv = c.post('/job')
-        self.assertEqual(rv.status_code, 400)  # no license key
+        with saliweb.test.temporary_directory() as t:
+            incoming = os.path.join(t, 'incoming')
+            os.mkdir(incoming)
+            modloop.app.config['DIRECTORIES_INCOMING'] = incoming
+            c = modloop.app.test_client()
+            rv = c.post('/job')
+            self.assertEqual(rv.status_code, 400)  # no license key
 
-        modkey = saliweb.test.get_modeller_key()
-        data = {'modkey': modkey}
-        rv = c.post('/job', data=data)
-        self.assertEqual(rv.status_code, 400)  # no loops
+            modkey = saliweb.test.get_modeller_key()
+            data = {'modkey': modkey}
+            rv = c.post('/job', data=data)
+            self.assertEqual(rv.status_code, 400)  # no loops
 
-        data['loops'] = '1::1::'
-        rv = c.post('/job', data=data)
-        self.assertEqual(rv.status_code, 400)  # no pdb file
+            data['loops'] = '1::1::'
+            rv = c.post('/job', data=data)
+            self.assertEqual(rv.status_code, 400)  # no pdb file
 
-        t = saliweb.test.TempDir()
-        pdbf = os.path.join(t.tmpdir, 'test.pdb')
-        with open(pdbf, 'w') as fh:
-            fh.write(
-                "REMARK\n"
-                "ATOM      2  CA  ALA     1      26.711  14.576   5.091\n")
+            pdbf = os.path.join(t, 'test.pdb')
+            with open(pdbf, 'w') as fh:
+                fh.write(
+                    "REMARK\n"
+                    "ATOM      2  CA  ALA     1      26.711  14.576   5.091\n")
 
-        # Successful submission (no email)
-        data['pdb'] = open(pdbf, 'rb')
-        rv = c.post('/job', data=data)
-        self.assertEqual(rv.status_code, 200)
-        r = re.compile(b'Your job has been submitted.*'
-                       b'You can check on your job',
-                       re.MULTILINE | re.DOTALL)
-        self.assertRegex(rv.data, r)
+            # Successful submission (no email)
+            data['pdb'] = open(pdbf, 'rb')
+            rv = c.post('/job', data=data)
+            self.assertEqual(rv.status_code, 200)
+            r = re.compile(b'Your job has been submitted.*'
+                           b'You can check on your job',
+                           re.MULTILINE | re.DOTALL)
+            self.assertRegex(rv.data, r)
 
-        # Successful submission (with email)
-        data['email'] = 'test@test.com'
-        data['pdb'] = open(pdbf, 'rb')
-        rv = c.post('/job', data=data)
-        self.assertEqual(rv.status_code, 200)
-        r = re.compile(b'Your job has been submitted.*You will be notified.*'
-                       b'You can check on your job', re.MULTILINE | re.DOTALL)
-        self.assertRegex(rv.data, r)
+            # Successful submission (with email)
+            data['email'] = 'test@test.com'
+            data['pdb'] = open(pdbf, 'rb')
+            rv = c.post('/job', data=data)
+            self.assertEqual(rv.status_code, 200)
+            r = re.compile(
+                b'Your job has been submitted.*You will be notified.*'
+                b'You can check on your job', re.MULTILINE | re.DOTALL)
+            self.assertRegex(rv.data, r)
 
     def test_check_loop_selection(self):
         """Test check_loop_selection()"""
@@ -117,31 +119,31 @@ class Tests(saliweb.test.TestCase):
 
     def test_read_pdb_file(self):
         """Test read_pdb_file()"""
-        t = saliweb.test.TempDir()
-        pdb = os.path.join(t.tmpdir, 'test.pdb')
-        with open(pdb, 'w') as fh:
-            for chain in (' ', 'A'):
-                for resid in range(1, 11):
-                    fh.write(
-                        "ATOM      1  CA  ALA %1s%4d      "
-                        "18.511  -1.416  15.632  1.00  6.84           C\n"
-                        % (chain, resid))
+        with saliweb.test.temporary_directory() as tmpdir:
+            pdb = os.path.join(tmpdir, 'test.pdb')
+            with open(pdb, 'w') as fh:
+                for chain in (' ', 'A'):
+                    for resid in range(1, 11):
+                        fh.write(
+                            "ATOM      1  CA  ALA %1s%4d      "
+                            "18.511  -1.416  15.632  1.00  6.84           C\n"
+                            % (chain, resid))
 
-        # Successful read
-        with open(pdb, 'rb') as fh:
-            contents = modloop.submit.read_pdb_file(fh, 2, [1, 1], [' ', 'A'],
-                                                    [5, 5], [' ', 'A'])
-        r = re.compile(
+            # Successful read
+            with open(pdb, 'rb') as fh:
+                contents = modloop.submit.read_pdb_file(
+                    fh, 2, [1, 1], [' ', 'A'], [5, 5], [' ', 'A'])
+            r = re.compile(
                 b'^ATOM\\s+1\\s+CA\\s+ALA     1.*ATOM\\s+1\\s+CA\\s+ALA A  10',
                 re.MULTILINE | re.DOTALL)
-        self.assertRegex(b"".join(contents), r)
+            self.assertRegex(b"".join(contents), r)
 
-        # Loop not found in ATOM records
-        with open(pdb, 'rb') as fh:
-            self.assertRaises(
-                saliweb.frontend.InputValidationError,
-                modloop.submit.read_pdb_file, fh, 2, [1, 1], [' ', 'A'],
-                [5, 15], [' ', 'A'])
+            # Loop not found in ATOM records
+            with open(pdb, 'rb') as fh:
+                self.assertRaises(
+                    saliweb.frontend.InputValidationError,
+                    modloop.submit.read_pdb_file, fh, 2, [1, 1], [' ', 'A'],
+                    [5, 15], [' ', 'A'])
 
 
 if __name__ == '__main__':
