@@ -16,12 +16,12 @@ class PreProcessTests(saliweb.test.TestCase):
         with saliweb.test.temporary_working_directory():
             s = modloop.make_python_script(('1', 'A', '10', 'A'), 'test.pdb',
                                            'myseq')
-            self.assertTrue(re.search(
+            r = re.compile(
                 r"def select_loop_atoms\(.*"
                 r"self\.residue_range\('1:A', '10:A'\).*"
                 r"MyLoop\(env, inimodel='test.pdb',.*"
-                r"sequence='myseq'", s, re.DOTALL | re.MULTILINE),
-                'Python script does not match regex: ' + s)
+                r"sequence='myseq'", re.DOTALL | re.MULTILINE)
+            self.assertRegex(s, r)
             # Make sure that the script contains no syntax errors
             with open('test.py', 'w') as fh:
                 fh.write(s)

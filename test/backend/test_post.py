@@ -61,14 +61,12 @@ class PostProcessTests(saliweb.test.TestCase):
                 ('1', 'A', '10', 'A', '20', 'B', '30', 'B'), 10)
             with open('output.pdb') as fh:
                 contents = fh.read()
-            r = re.compile(r'^REMARK\nREMARK\s+Dear User.*'
+            r = re.compile(r'\AREMARK\nREMARK\s+Dear User.*'
                            r'^REMARK\s+of your protein: ``myjob\'\'.*'
                            r'listed below:.*^REMARK\s+1:A-10:A.*'
                            r'^REMARK\s+20:B-30:B.*best model$',
                            re.MULTILINE | re.DOTALL)
-            self.assertTrue(
-                r.match(contents),
-                'File contents:\n%s\ndo not match regex' % contents)
+            self.assertRegex(contents, r)
             os.unlink('output.pdb')
 
 
