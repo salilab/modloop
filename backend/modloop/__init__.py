@@ -114,15 +114,15 @@ def make_python_script(loops, input_pdb, sequence):
 # compute cluster), then returns the single model with the best (lowest)
 # value of the Modeller objective function.
 
-from modeller import *
-from modeller.automodel import *
+from modeller import Environ, Selection
+from modeller.automodel import LoopModel
 import sys
 
 # to get different starting models for each task
 taskid = int(sys.argv[1])
-env = environ(rand_seed=-1000-taskid)
+env = Environ(rand_seed=-1000-taskid)
 
-class MyLoop(loopmodel):
+class MyLoop(LoopModel):
     def select_loop_atoms(self):
         rngs = (
 %(residue_range)s
@@ -130,7 +130,7 @@ class MyLoop(loopmodel):
         for rng in rngs:
             if len(rng) > 30:
                 raise ModellerError("loop too long")
-        s = selection(rngs)
+        s = Selection(rngs)
         if len(s.only_no_topology()) > 0:
             raise ModellerError("some selected residues have no topology")
         return s
@@ -157,7 +157,7 @@ mkdir -p $tmpdir && cd $tmpdir || exit 1
 cp %(directory)s/$input %(directory)s/input.pdb .
 
 module load Sali
-module load modeller/9.25
+module load modeller/10.0
 python $input ${SGE_TASK_ID} >& $output
 
 # Copy back PDB
