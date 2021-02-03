@@ -114,8 +114,8 @@ def make_python_script(loops, input_pdb, sequence):
 # compute cluster), then returns the single model with the best (lowest)
 # value of the Modeller objective function.
 
-from modeller import Environ, Selection
-from modeller.automodel import LoopModel
+from modeller import Environ, Selection, ModellerError
+from modeller.automodel import LoopModel, refine
 import sys
 
 # to get different starting models for each task
