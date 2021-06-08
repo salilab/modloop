@@ -29,6 +29,4 @@ jobs:
       run: |
         scons coverage=true python=$(which python) test
         flake8 .
-    - name: Upload coverage to codecov
-      run: |
-        bash <(curl -s https://codecov.io/bash)
+    - uses: codecov/codecov-action@v1
