@@ -1,5 +1,6 @@
 import unittest
 import saliweb.test
+import tempfile
 import os
 import re
 
@@ -13,7 +14,7 @@ class Tests(saliweb.test.TestCase):
 
     def test_submit_page(self):
         """Test submit page"""
-        with saliweb.test.temporary_directory() as t:
+        with tempfile.TemporaryDirectory() as t:
             incoming = os.path.join(t, 'incoming')
             os.mkdir(incoming)
             modloop.app.config['DIRECTORIES_INCOMING'] = incoming
@@ -119,7 +120,7 @@ class Tests(saliweb.test.TestCase):
 
     def test_read_pdb_file(self):
         """Test read_pdb_file()"""
-        with saliweb.test.temporary_directory() as tmpdir:
+        with tempfile.TemporaryDirectory() as tmpdir:
             pdb = os.path.join(tmpdir, 'test.pdb')
             with open(pdb, 'w') as fh:
                 for chain in (' ', 'A'):
