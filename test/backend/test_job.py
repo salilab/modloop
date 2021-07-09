@@ -64,8 +64,8 @@ class JobTests(saliweb.test.TestCase):
                 fh.write("*** ABNORMAL TERMINATION of Modeller\n")
             self.assertRaises(modloop.AssertionError, j.postprocess)
 
-    def test_postprocess_models(self):
-        """Test postprocess method; some models produced"""
+    def test_postprocess_pdb_models(self):
+        """Test postprocess method; some PDB models produced"""
         j = self.make_test_job(modloop.Job, 'POSTPROCESSING')
         j.required_completed_tasks = 0
         with saliweb.test.working_directory(j.directory):
@@ -86,6 +86,31 @@ class JobTests(saliweb.test.TestCase):
             os.unlink('ignored.pdb')
             self.assertFalse(os.path.exists('loop.BL0.pdb'))
             self.assertFalse(os.path.exists('loop.BL1.pdb'))
+
+    def test_postprocess_cif_models(self):
+        """Test postprocess method; some mmCIF models produced"""
+        j = self.make_test_job(modloop.Job, 'POSTPROCESSING')
+        j.required_completed_tasks = 0
+        with saliweb.test.working_directory(j.directory):
+            with open('input.cif', 'w') as fh:
+                pass
+            with open('loop.BL0.cif', 'w') as fh:
+                fh.write(
+                    "_modeller.objective_function       309.6122\n")
+            with open('loop.BL1.cif', 'w') as fh:
+                fh.write(
+                    "_modeller.objective_function      -457.3816\n")
+            with open('ignored.cif', 'w') as fh:
+                fh.write(
+                    "_modeller.objective_function      -900.3816\n")
+            with open('loops.tsv', 'w') as fh:
+                fh.write('1\tA\t5\tA')
+            j.postprocess()
+            os.unlink('output.cif')
+            os.unlink('output-pdbs.tar.bz2')
+            os.unlink('ignored.cif')
+            self.assertFalse(os.path.exists('loop.BL0.cif'))
+            self.assertFalse(os.path.exists('loop.BL1.cif'))
 
     def test_postprocess_insufficient_models(self):
         """Test postprocess method; too few models produced"""
