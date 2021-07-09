@@ -3,6 +3,7 @@ import saliweb.test
 import tempfile
 import os
 import re
+from werkzeug.datastructures import FileStorage
 
 # Import the modloop frontend with mocks
 modloop = saliweb.test.import_mocked_frontend("modloop", __file__,
@@ -132,8 +133,9 @@ class Tests(saliweb.test.TestCase):
 
             # Successful read
             with open(pdb, 'rb') as fh:
+                fs = FileStorage(stream=fh, filename='test.pdb')
                 contents, pdbext = modloop.submit.read_pdb_file(
-                    fh, 2, [1, 1], [' ', 'A'], [5, 5], [' ', 'A'])
+                    fs, 2, [1, 1], [' ', 'A'], [5, 5], [' ', 'A'])
             r = re.compile(
                 b'^ATOM\\s+1\\s+CA\\s+ALA     1.*ATOM\\s+1\\s+CA\\s+ALA A  10',
                 re.MULTILINE | re.DOTALL)
@@ -142,9 +144,10 @@ class Tests(saliweb.test.TestCase):
 
             # Loop not found in ATOM records
             with open(pdb, 'rb') as fh:
+                fs = FileStorage(stream=fh, filename='test.pdb')
                 self.assertRaises(
                     saliweb.frontend.InputValidationError,
-                    modloop.submit.read_pdb_file, fh, 2, [1, 1], [' ', 'A'],
+                    modloop.submit.read_pdb_file, fs, 2, [1, 1], [' ', 'A'],
                     [5, 15], [' ', 'A'])
 
     def test_read_pdb_file_cif(self):
@@ -189,8 +192,9 @@ _atom_site.pdbx_PDB_model_num
 
             # Successful read
             with open(pdb, 'rb') as fh:
+                fs = FileStorage(stream=fh, filename='test.cif')
                 contents, pdbext = modloop.submit.read_pdb_file(
-                    fh, 2, [1, 1], ['A', 'B'], [5, 5], ['A', 'B'])
+                    fs, 2, [1, 1], ['A', 'B'], [5, 5], ['A', 'B'])
             r = re.compile(
                 rb'^loop_.*_atom_site\.auth_atom_id.*ATOM 1 C CA',
                 re.MULTILINE | re.DOTALL)
@@ -199,9 +203,10 @@ _atom_site.pdbx_PDB_model_num
 
             # Loop not found in ATOM records
             with open(pdb, 'rb') as fh:
+                fs = FileStorage(stream=fh, filename='test.cif')
                 self.assertRaises(
                     saliweb.frontend.InputValidationError,
-                    modloop.submit.read_pdb_file, fh, 2, [1, 1], [' ', 'A'],
+                    modloop.submit.read_pdb_file, fs, 2, [1, 1], [' ', 'A'],
                     [5, 15], [' ', 'A'])
 
     def test_read_pdb_file_invalid_cif(self):
@@ -211,9 +216,10 @@ _atom_site.pdbx_PDB_model_num
             with open(pdb, 'w') as fh:
                 fh.write("loop_\n_atom_site.group_PDB\n_bad_cat.id\n")
             with open(pdb, 'rb') as fh:
+                fs = FileStorage(stream=fh, filename='test.cif')
                 self.assertRaises(
                     saliweb.frontend.InputValidationError,
-                    modloop.submit.read_pdb_file, fh, 2, [1, 1], [' ', 'A'],
+                    modloop.submit.read_pdb_file, fs, 2, [1, 1], [' ', 'A'],
                     [5, 15], [' ', 'A'])
 
 

@@ -189,7 +189,7 @@ def read_pdb_file(pdb, loops, start_res, start_id, end_res, end_id):
                    in itertools.chain(zip(start_id, start_res),
                                       zip(end_id, end_res)))
 
-    if pdb.name.lower().endswith('.cif'):
+    if pdb.filename.lower().endswith('.cif'):
         check = CifFileChecker(pdb)
     else:
         check = PdbFileChecker(pdb)
