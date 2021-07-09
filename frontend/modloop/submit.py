@@ -2,7 +2,6 @@ from flask import request
 import saliweb.frontend
 import re
 import itertools
-import sys
 import ihm.format
 
 
