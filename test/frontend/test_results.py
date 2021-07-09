@@ -13,7 +13,8 @@ class Tests(saliweb.test.TestCase):
     def test_results_file(self):
         """Test download of results files"""
         with saliweb.test.make_frontend_job('testjob') as j:
-            for fname in ('bad.log', 'output.pdb', 'failure.log'):
+            for fname in ('bad.log', 'output.pdb', 'output.cif',
+                          'failure.log'):
                 j.make_file(fname)
             c = modloop.app.test_client()
             # Prohibited file (that exists)
@@ -23,6 +24,8 @@ class Tests(saliweb.test.TestCase):
             rv = c.get('/job/testjob/failure.log?passwd=%s' % j.passwd)
             self.assertEqual(rv.status_code, 200)
             rv = c.get('/job/testjob/output.pdb?passwd=%s' % j.passwd)
+            self.assertEqual(rv.status_code, 200)
+            rv = c.get('/job/testjob/output.cif?passwd=%s' % j.passwd)
             self.assertEqual(rv.status_code, 200)
 
     def test_ok_job_pdb(self):

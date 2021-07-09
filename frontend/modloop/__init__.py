@@ -61,7 +61,7 @@ def results(name):
 @app.route('/job/<name>/<path:fp>')
 def results_file(name, fp):
     job = get_completed_job(name, request.args.get('passwd'))
-    if fp in ('output.pdb', 'failure.log', 'loop.py'):
+    if fp in ('output.pdb', 'output.cif', 'failure.log', 'loop.py'):
         return send_from_directory(job.directory, fp)
     else:
         abort(404)
