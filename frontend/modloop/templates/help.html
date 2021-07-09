@@ -10,7 +10,7 @@
 <a id="email"><b>E-mail address</b></a>
 
 <p>If an e-mail address is entered here, it will be used to notify you
-when the job has completed. (Unlike older versions of ModLoop, the PDB file
+when the job has completed. (Unlike older versions of ModLoop, the resulting model
 is not emailed directly to you, but can be downloaded from this web site.)</p>
 </li>
 
@@ -29,9 +29,9 @@ here in order to use this server.</p>
 <li>
 <a id="file"><b>Upload your file</b></a>
 
-<p>The uploaded coordinate file must be a valid PDB format file. The loop region
+<p>The uploaded coordinate file must be a valid PDB or mmCIF format file. The loop region
 to be modeled must be included in the coordinate file, since the amino acid
-sequence and initial loop energy are derived from the PDB file. (You can give
+sequence and initial loop energy are derived from the PDB or mmCIF file. (You can give
 the loop atoms dummy coordinates, but each atom must have different coordinates,
 or you will get a 'Central bond too short' error from Modeller.)</p></li>
 
@@ -43,7 +43,7 @@ should be specified here, separated by ":". One can specify several loop
 segments, but the total number of residues involved in the loops must not
 exceed 14. Only regular amino acids can be selected for loop modeling (i.e.
 no non-standard residues such as ligands, DNA strands, etc.) although the
-non-loop regions of your PDB <i>can</i> contain non-standard residues.
+non-loop regions of your PDB/mmCIF <i>can</i> contain non-standard residues.
 Please use the following syntax:</p>
 
 <p>Example 1. one loop between residues 12 and 18 in chain B:</p>
@@ -59,7 +59,7 @@ position 66 in chain C to be selected:</p>
 </pre>
 
 <p>Note that ModLoop refines the position of residues that <b>already</b>
-exist in your PDB file - it does not add missing residues (if you want to do
+exist in your PDB/mmCIF file - it does not add missing residues (if you want to do
 that, add the residues with dummy coordinates yourself first).
 </li>
 
@@ -78,7 +78,7 @@ system.</p>
 
 <ul>
 <li><b>'Central bond too short'</b>: this is usually caused by having two or
-more atoms in your input PDB file with the same coordinates. (Tip: if you
+more atoms in your input PDB/mmCIF file with the same coordinates. (Tip: if you
 don't know the original coordinates of your loop, specify dummy
 coordinates, but don't put every atom at (0,0,0).)</li>
 
@@ -87,9 +87,9 @@ protocol is only defined on standard amino acids. Thus, you can't select
 residues for modeling which have no defined MODELLER topology, such as
 DNA/RNA, metal ions, or ligands.</li>
 
-<li><b>'loop too long'</b>: this can happen if your PDB file residues are
-not sequential, or the chains are interleaved. MODELLER reads PDB files
-strictly sequentially, so if your PDB file contains residues 1-100 in chain A,
+<li><b>'loop too long'</b>: this can happen if your PDB/mmCIF file residues are
+not sequential, or the chains are interleaved. MODELLER reads PDB or mmCIF files
+strictly sequentially, so if your file contains residues 1-100 in chain A,
 followed by 1-100 in chain B, followed by 101-200 in chain A, and your loop
 selection is 99:A:101:A:, MODELLER will actually try to model the entire B
 chain (since it falls between residues 99 and 101 in chain A). This is

@@ -20,7 +20,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        pip install coverage scons flask flake8
+        pip install coverage scons flask flake8 ihm
         git clone --depth=5 https://github.com/salilab/saliweb
         export PYTHON=`pip show coverage |grep Location|cut -b11-`
         (cd saliweb && scons modeller_key=UNKNOWN pythondir=$PYTHON perldir=~/perl prefix=~/usr webdir=~/www install && touch $PYTHON/saliweb/frontend/config.py)

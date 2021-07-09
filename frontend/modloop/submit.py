@@ -3,6 +3,7 @@ import saliweb.frontend
 import re
 import itertools
 import sys
+import ihm.format
 
 
 def handle_new_job():
@@ -21,15 +22,15 @@ def handle_new_job():
      end_id, loop_data) = parse_loop_selection(loops)
 
     # read coordinates from file, and check loop residues
-    user_pdb = read_pdb_file(user_pdb_name, loops, start_res,
-                             start_id, end_res, end_id)
+    user_pdb, pdbext = read_pdb_file(user_pdb_name, loops, start_res,
+                                     start_id, end_res, end_id)
 
     job = {}
 
     job = saliweb.frontend.IncomingJob(user_name)
 
-    # Write PDB input
-    with open(job.get_path('input.pdb'), 'wb') as fh:
+    # Write PDB/mmCIF input
+    with open(job.get_path('input%s' % pdbext), 'wb') as fh:
         fh.writelines(user_pdb)
 
     # Write loop selection
@@ -123,8 +124,62 @@ def parse_loop_selection(loops):
     return loops, start_res, start_id, end_res, end_id, loop_data
 
 
+class FileChecker:
+    def __init__(self, fh):
+        self.fh = fh
+
+
+class PdbFileChecker(FileChecker):
+    filetype = 'PDB'
+    extension = '.pdb'
+
+    def check_residues(self, residues):
+        def make_residue_id(chain, residue):
+            return "%s:%s" % (str(residue).replace(' ', ''),
+                              chain.replace(' ', ''))
+
+        file_contents = self.fh.readlines()
+        atom_re = re.compile(b'ATOM.................(.)(....)')
+        for line in file_contents:
+            m = atom_re.match(line)
+            if m:
+                chain, res = m.group(1), m.group(2)
+                chain = chain.decode('ascii')
+                res = res.decode('ascii')
+                residues.discard(make_residue_id(chain, res))
+        return file_contents
+
+
+class AtomSiteHandler:
+    not_in_file = omitted = unknown = None
+
+    def __init__(self, residues):
+        self.residues = residues
+
+    def __call__(self, group_pdb, label_asym_id, label_seq_id, auth_seq_id):
+        if group_pdb == 'ATOM':
+            seq_id = auth_seq_id if auth_seq_id is not None else label_seq_id
+            self.residues.discard("%s:%s" % (seq_id, label_asym_id or ''))
+
+
+class CifFileChecker(FileChecker):
+    filetype = 'mmCIF'
+    extension = '.cif'
+
+    def check_residues(self, residues):
+        ash = AtomSiteHandler(residues)
+        c = ihm.format.CifReader(self.fh, category_handler={'_atom_site': ash})
+        try:
+            c.read_file()  # read first block
+        except ihm.format.CifParserError as err:
+            raise saliweb.frontend.InputValidationError(
+                "Invalid mmCIF file uploaded: %s" % str(err))
+        self.fh.seek(0)
+        return self.fh.readlines()
+
+
 def read_pdb_file(pdb, loops, start_res, start_id, end_res, end_id):
-    """Read in uploaded PDB file, and check loop residues"""
+    """Read in uploaded PDB/mmCIF file, and check loop residues"""
     def make_residue_id(chain, residue):
         return "%s:%s" % (str(residue).replace(' ', ''),
                           chain.replace(' ', ''))
@@ -134,20 +189,16 @@ def read_pdb_file(pdb, loops, start_res, start_id, end_res, end_id):
                    in itertools.chain(zip(start_id, start_res),
                                       zip(end_id, end_res)))
 
-    file_contents = pdb.readlines()
-    atom_re = re.compile(b'ATOM.................(.)(....)')
-    for line in file_contents:
-        m = atom_re.match(line)
-        if m:
-            chain, res = m.group(1), m.group(2)
-            if sys.version_info[0] >= 3:
-                chain = chain.decode('ascii')
-                res = res.decode('ascii')
-            residues.discard(make_residue_id(chain, res))
+    if pdb.name.lower().endswith('.cif'):
+        check = CifFileChecker(pdb)
+    else:
+        check = PdbFileChecker(pdb)
+    file_contents = check.check_residues(residues)
+
     if len(residues) > 0:
         raise saliweb.frontend.InputValidationError(
             "The following residues were not found in ATOM records in"
-            " the PDB file: " + ", ".join(sorted(residues)) +
+            " the %s file: " % check.filetype + ", ".join(sorted(residues)) +
             ". Check that you specified the loop segments correctly, and"
-            " that you uploaded the correct PDB file.")
-    return file_contents
+            " that you uploaded the correct %s file." % check.filetype)
+    return file_contents, check.extension

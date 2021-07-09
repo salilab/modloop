@@ -118,8 +118,8 @@ class Tests(saliweb.test.TestCase):
             saliweb.frontend.InputValidationError,
             modloop.submit.parse_loop_selection, '::10::20:A:31:A:')
 
-    def test_read_pdb_file(self):
-        """Test read_pdb_file()"""
+    def test_read_pdb_file_pdb(self):
+        """Test read_pdb_file() in PDB format"""
         with tempfile.TemporaryDirectory() as tmpdir:
             pdb = os.path.join(tmpdir, 'test.pdb')
             with open(pdb, 'w') as fh:
@@ -132,14 +132,84 @@ class Tests(saliweb.test.TestCase):
 
             # Successful read
             with open(pdb, 'rb') as fh:
-                contents = modloop.submit.read_pdb_file(
+                contents, pdbext = modloop.submit.read_pdb_file(
                     fh, 2, [1, 1], [' ', 'A'], [5, 5], [' ', 'A'])
             r = re.compile(
                 b'^ATOM\\s+1\\s+CA\\s+ALA     1.*ATOM\\s+1\\s+CA\\s+ALA A  10',
                 re.MULTILINE | re.DOTALL)
+            self.assertEqual(pdbext, '.pdb')
             self.assertRegex(b"".join(contents), r)
 
             # Loop not found in ATOM records
+            with open(pdb, 'rb') as fh:
+                self.assertRaises(
+                    saliweb.frontend.InputValidationError,
+                    modloop.submit.read_pdb_file, fh, 2, [1, 1], [' ', 'A'],
+                    [5, 15], [' ', 'A'])
+
+    def test_read_pdb_file_cif(self):
+        """Test read_pdb_file() in mmCIF format"""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            pdb = os.path.join(tmpdir, 'test.cif')
+            with open(pdb, 'w') as fh:
+                fh.write("""
+loop_
+_atom_site.group_PDB
+_atom_site.id
+_atom_site.type_symbol
+_atom_site.label_atom_id
+_atom_site.label_alt_id
+_atom_site.label_comp_id
+_atom_site.label_asym_id
+_atom_site.label_entity_id
+_atom_site.label_seq_id
+_atom_site.pdbx_PDB_ins_code
+_atom_site.Cartn_x
+_atom_site.Cartn_y
+_atom_site.Cartn_z
+_atom_site.occupancy
+_atom_site.B_iso_or_equiv
+_atom_site.pdbx_formal_charge
+_atom_site.auth_seq_id
+_atom_site.auth_comp_id
+_atom_site.auth_asym_id
+_atom_site.auth_atom_id
+_atom_site.pdbx_PDB_model_num
+""")
+                fh.write("HETATM 1 C CA . ALA X 1 . ? "
+                         "18.511  -1.416  15.632  1.00 "
+                         "6.84 ? . ALA X CA 1\n")
+                for chain in ('A', 'B'):
+                    for resid in range(1, 11):
+                        fh.write(
+                            "ATOM 1 C CA . ALA %s 1 %d ? "
+                            "18.511  -1.416  15.632  1.00 "
+                            "6.84 ? %d ALA %s CA 1\n"
+                            % (chain, resid, resid, chain))
+
+            # Successful read
+            with open(pdb, 'rb') as fh:
+                contents, pdbext = modloop.submit.read_pdb_file(
+                    fh, 2, [1, 1], ['A', 'B'], [5, 5], ['A', 'B'])
+            r = re.compile(
+                rb'^loop_.*_atom_site\.auth_atom_id.*ATOM 1 C CA',
+                re.MULTILINE | re.DOTALL)
+            self.assertEqual(pdbext, '.cif')
+            self.assertRegex(b"".join(contents), r)
+
+            # Loop not found in ATOM records
+            with open(pdb, 'rb') as fh:
+                self.assertRaises(
+                    saliweb.frontend.InputValidationError,
+                    modloop.submit.read_pdb_file, fh, 2, [1, 1], [' ', 'A'],
+                    [5, 15], [' ', 'A'])
+
+    def test_read_pdb_file_invalid_cif(self):
+        """Test read_pdb_file() with invalid mmCIF input"""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            pdb = os.path.join(tmpdir, 'test.cif')
+            with open(pdb, 'w') as fh:
+                fh.write("loop_\n_atom_site.group_PDB\n_bad_cat.id\n")
             with open(pdb, 'rb') as fh:
                 self.assertRaises(
                     saliweb.frontend.InputValidationError,

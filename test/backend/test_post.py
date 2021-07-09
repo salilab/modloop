@@ -27,8 +27,8 @@ class PostProcessTests(saliweb.test.TestCase):
             tar.close()
             os.unlink('output-pdbs.tar.bz2')
 
-    def test_get_best_model(self):
-        """Check get_best_model function"""
+    def test_pdb_get_best(self):
+        """Check PdbModel.get_best function"""
         with saliweb.test.temporary_working_directory():
             with open('test1.pdb', 'w') as fh:
                 fh.write(
@@ -40,24 +40,51 @@ class PostProcessTests(saliweb.test.TestCase):
                     "REMARK   1 MODELLER OBJECTIVE FUNCTION:      -457.3816\n")
             with open('empty.pdb', 'w') as fh:
                 pass
-            self.assertEqual(modloop.get_best_model([]), None)
-            self.assertEqual(modloop.get_best_model(['empty.pdb']), None)
-            self.assertEqual(modloop.get_best_model(['test1.pdb']),
+            model = modloop.PdbModel()
+            self.assertEqual(model.get_best([]), None)
+            self.assertEqual(model.get_best(['empty.pdb']), None)
+            self.assertEqual(model.get_best(['test1.pdb']),
                              'test1.pdb')
             self.assertEqual(
-                modloop.get_best_model(['test1.pdb', 'test2.pdb']),
+                model.get_best(['test1.pdb', 'test2.pdb']),
                 'test2.pdb')
             self.assertEqual(
-                modloop.get_best_model(['test2.pdb', 'test1.pdb']),
+                model.get_best(['test2.pdb', 'test1.pdb']),
                 'test2.pdb')
 
-    def test_make_output_pdb(self):
-        """Check make_output_pdb function"""
+    def test_cif_get_best(self):
+        """Check CifModel.get_best function"""
+        with saliweb.test.temporary_working_directory():
+            with open('test1.cif', 'w') as fh:
+                fh.write(
+                    "_modeller.objective_function     309.6122\n"
+                    "dummy\n")
+            with open('test2.cif', 'w') as fh:
+                fh.write(
+                    "dummy\n"
+                    "_modeller.objective_function    -457.3816\n")
+            with open('empty.cif', 'w') as fh:
+                pass
+            model = modloop.CifModel()
+            self.assertEqual(model.get_best([]), None)
+            self.assertEqual(model.get_best(['empty.cif']), None)
+            self.assertEqual(model.get_best(['test1.cif']),
+                             'test1.cif')
+            self.assertEqual(
+                model.get_best(['test1.cif', 'test2.cif']),
+                'test2.cif')
+            self.assertEqual(
+                model.get_best(['test2.cif', 'test1.cif']),
+                'test2.cif')
+
+    def test_pdb_make_output(self):
+        """Check PdbModel.make_output function"""
         with saliweb.test.temporary_working_directory():
             with open('test1.pdb', 'w') as fh:
                 fh.write("best model\n")
-            modloop.make_output_pdb(
-                'test1.pdb', 'output.pdb', 'myjob',
+            model = modloop.PdbModel()
+            model.make_output(
+                'test1.pdb', 'myjob',
                 ('1', 'A', '10', 'A', '20', 'B', '30', 'B'), 10)
             with open('output.pdb') as fh:
                 contents = fh.read()
@@ -68,6 +95,25 @@ class PostProcessTests(saliweb.test.TestCase):
                            re.MULTILINE | re.DOTALL)
             self.assertRegex(contents, r)
             os.unlink('output.pdb')
+
+    def test_cif_make_output(self):
+        """Check CifModel.make_output function"""
+        with saliweb.test.temporary_working_directory():
+            with open('test1.cif', 'w') as fh:
+                fh.write("best model\n")
+            model = modloop.CifModel()
+            model.make_output(
+                'test1.cif', 'myjob',
+                ('1', 'A', '10', 'A', '20', 'B', '30', 'B'), 10)
+            with open('output.cif') as fh:
+                contents = fh.read()
+            r = re.compile(r'\A#\n#\s+Dear User.*'
+                           r'^#\s+of your protein: ``myjob\'\'.*'
+                           r'listed below:.*^#\s+1:A-10:A.*'
+                           r'^#\s+20:B-30:B.*best model$',
+                           re.MULTILINE | re.DOTALL)
+            self.assertRegex(contents, r)
+            os.unlink('output.cif')
 
 
 if __name__ == '__main__':

@@ -18,6 +18,86 @@ class IncompleteJobError(Exception):
     pass
 
 
+class _Model(object):
+    def get_outputs(self):
+        return glob.glob("loop*.BL*.%s" % self.extension)
+
+    def get_best(self, outputs):
+        best_pdb = best_score = None
+        for pdb in outputs:
+            with open(pdb) as f:
+                for line in f:
+                    m = self.objfunc_re.search(line)
+                    if m:
+                        score = float(m.group(1))
+                        if best_pdb is None or score < best_score:
+                            best_pdb = pdb
+                            best_score = score
+                        break
+        return best_pdb
+
+    def get_output_header(self, jobname, loops, nmodel):
+        residue_range = []
+        for i in range(0, len(loops), 4):
+            residue_range.append("   %s:%s-%s:%s" % tuple(loops[i:i + 4]))
+        looplist = "\n".join(residue_range)
+        return """
+Dear User,
+
+Coordinates for the lowest energy model (out of %(nmodel)d sampled)
+of your protein: ``%(jobname)s''  are returned with
+the optimized loop regions, listed below:
+%(looplist)s
+
+for references please cite these two articles:
+
+   A Fiser, RKG Do and A Sali,
+   Modeling of loops in protein structures
+   Prot. Sci. (2000) 9, 1753-1773
+
+   A Fiser and A Sali,
+   ModLoop: Automated modeling of loops in protein structures
+   Bioinformatics. (2003) 18(19) 2500-01
+
+
+For further inquiries, please contact: modloop@salilab.org
+
+with best regards,
+Andras Fiser
+
+
+""" % locals()
+
+    def make_output(self, best_model, jobname, loops, nmodel):
+        with open(best_model) as fin:
+            with open(self.output_file, 'w') as fout:
+                for line in self.get_output_header(
+                        jobname, loops, nmodel).split('\n'):
+                    if line == '':
+                        fout.write('%s\n' % self.remark_prefix)
+                    else:
+                        fout.write('%s     %s\n' % (self.remark_prefix, line))
+                fout.writelines(fin)
+
+
+class PdbModel(_Model):
+    input_file = 'input.pdb'
+    output_file = 'output.pdb'
+    file_format = 'PDB'
+    extension = 'pdb'
+    objfunc_re = re.compile('OBJECTIVE FUNCTION:(.*)$')
+    remark_prefix = 'REMARK'
+
+
+class CifModel(_Model):
+    input_file = 'input.cif'
+    output_file = 'output.cif'
+    file_format = 'MMCIF'
+    extension = 'cif'
+    objfunc_re = re.compile('_modeller.objective_function (.*)$')
+    remark_prefix = '#'
+
+
 def compress_output_pdbs(pdbs):
     t = tarfile.open('output-pdbs.tar.bz2', 'w:bz2')
     for pdb in pdbs:
@@ -26,22 +106,6 @@ def compress_output_pdbs(pdbs):
 
     for pdb in pdbs:
         os.unlink(pdb)
-
-
-def get_best_model(pdbs):
-    best_pdb = best_score = None
-    objfunc_re = re.compile('OBJECTIVE FUNCTION:(.*)$')
-    for pdb in pdbs:
-        with open(pdb) as f:
-            for line in f:
-                m = objfunc_re.search(line)
-                if m:
-                    score = float(m.group(1))
-                    if best_pdb is None or score < best_score:
-                        best_pdb = pdb
-                        best_score = score
-                    break
-    return best_pdb
 
 
 def make_failure_log(logname):
@@ -62,49 +126,14 @@ def make_failure_log(logname):
         raise NoLogError("No log files produced")
 
 
-def make_output_pdb(best_model, out, jobname, loops, nmodel):
-    residue_range = []
-    for i in range(0, len(loops), 4):
-        residue_range.append("REMARK        %s:%s-%s:%s"
-                             % tuple(loops[i:i + 4]))
-    looplist = "\n".join(residue_range)
-    with open(best_model) as fin:
-        with open(out, 'w') as fout:
-            fout.write("""REMARK
-REMARK     Dear User,
-REMARK
-REMARK     Coordinates for the lowest energy model (out of %(nmodel)d sampled)
-REMARK     of your protein: ``%(jobname)s''  are returned with
-REMARK     the optimized loop regions, listed below:
-%(looplist)s
-REMARK
-REMARK     for references please cite these two articles:
-REMARK
-REMARK        A Fiser, RKG Do and A Sali,
-REMARK        Modeling of loops in protein structures
-REMARK        Prot. Sci. (2000) 9, 1753-1773
-REMARK
-REMARK        A Fiser and A Sali,
-REMARK        ModLoop: Automated modeling of loops in protein structures
-REMARK        Bioinformatics. (2003) 18(19) 2500-01
-REMARK
-REMARK
-REMARK     For further inquiries, please contact: modloop@salilab.org
-REMARK
-REMARK     with best regards,
-REMARK     Andras Fiser
-REMARK
-REMARK
-""" % locals())
-            fout.writelines(fin)
-
-
-def make_python_script(loops, input_pdb, sequence):
+def make_python_script(loops, model, sequence):
     residue_range = []
     for i in range(0, len(loops), 4):
         residue_range.append("           self.residue_range"
                              "('%s:%s', '%s:%s')," % tuple(loops[i:i + 4]))
     residue_range = "\n".join(residue_range)
+    input_pdb = model.input_file
+    model_format = model.file_format
     return """
 # Run this script with something like
 #    python loop.py N > N.log
@@ -137,6 +166,7 @@ class MyLoop(LoopModel):
 
 m = MyLoop(env, inimodel='%(input_pdb)s',
            sequence='%(sequence)s')
+m.set_output_model_format('%(model_format)s')
 m.loop.md_level = refine.slow
 m.loop.starting_model = m.loop.ending_model = taskid
 
@@ -144,7 +174,8 @@ m.make()
 """ % locals()
 
 
-def make_sge_script(runnercls, jobname, directory, number_of_tasks):
+def make_sge_script(runnercls, model, jobname, directory, number_of_tasks):
+    input_pdb = model.input_file
     script = """
 input="loop.py"
 output="${SGE_TASK_ID}.log"
@@ -154,13 +185,13 @@ tmpdir="/scratch/${USER}/modloop/%(jobname)s/$SGE_TASK_ID"
 mkdir -p $tmpdir && cd $tmpdir || exit 1
 
 # Get input files
-cp %(directory)s/$input %(directory)s/input.pdb .
+cp %(directory)s/$input %(directory)s/%(input_pdb)s .
 
 module load Sali
 module load modeller/10.1
 python $input ${SGE_TASK_ID} >& $output
 
-# Copy back PDB
+# Copy back PDB/mmCIF
 cp *.B* %(directory)s
 
 # Copy back log file (first 5000 lines only, and only for some tasks, in
@@ -192,29 +223,37 @@ class Job(saliweb.backend.Job):
         if len(loops) % 4 != 0:
             raise saliweb.backend.SanityError(
                 "loops should be a multiple of 4")
-        p = make_python_script(loops, 'input.pdb', 'loop')
+        model = self._get_model()
+        p = make_python_script(loops, model, 'loop')
         with open('loop.py', 'w') as fh:
             fh.write(p)
-        return make_sge_script(self.runnercls, self.name, self.directory,
-                               self.number_of_tasks)
+        return make_sge_script(self.runnercls, model, self.name,
+                               self.directory, self.number_of_tasks)
+
+    def _get_model(self):
+        if os.path.exists('input.cif'):
+            return CifModel()
+        else:
+            return PdbModel()
 
     def postprocess(self):
-        output_pdbs = glob.glob("loop*.BL*.pdb")
-        best_model = get_best_model(output_pdbs)
+        model = self._get_model()
+        outputs = model.get_outputs()
+        best_model = model.get_best(outputs)
         if best_model:
-            if len(output_pdbs) < self.required_completed_tasks:
+            if len(outputs) < self.required_completed_tasks:
                 raise IncompleteJobError("Only %d out of %d modeling tasks "
                                          "completed - at least %d must "
                                          "complete for reasonable results"
-                                         % (len(output_pdbs),
+                                         % (len(outputs),
                                             self.number_of_tasks,
                                             self.required_completed_tasks))
             else:
                 with open('loops.tsv') as fh:
                     loops = fh.read().rstrip('\r\n').split('\t')
-                make_output_pdb(best_model, 'output.pdb', self.name, loops,
-                                len(output_pdbs))
-                compress_output_pdbs(output_pdbs)
+                model.make_output(best_model, self.name, loops,
+                                  len(outputs))
+                compress_output_pdbs(outputs)
         else:
             make_failure_log('failure.log')
 
