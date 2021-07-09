@@ -44,12 +44,18 @@ def job():
 @app.route('/job/<name>')
 def results(name):
     job = get_completed_job(name, request.args.get('passwd'))
+    output = {}
     # Determine whether the job completed successfully
     if os.path.exists(job.get_path('output.pdb')):
         template = 'results_ok.html'
+        output = {'name': 'output.pdb', 'desc': 'PDB'}
+    elif os.path.exists(job.get_path('output.cif')):
+        template = 'results_ok.html'
+        output = {'name': 'output.cif', 'desc': 'mmCIF'}
     else:
         template = 'results_failed.html'
-    return saliweb.frontend.render_results_template(template, job=job)
+    return saliweb.frontend.render_results_template(template, job=job,
+                                                    output=output)
 
 
 @app.route('/job/<name>/<path:fp>')

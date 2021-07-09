@@ -25,8 +25,8 @@ class Tests(saliweb.test.TestCase):
             rv = c.get('/job/testjob/output.pdb?passwd=%s' % j.passwd)
             self.assertEqual(rv.status_code, 200)
 
-    def test_ok_job(self):
-        """Test display of OK job"""
+    def test_ok_job_pdb(self):
+        """Test display of OK job, PDB output"""
         with saliweb.test.make_frontend_job('testjob2') as j:
             j.make_file("output.pdb")
             c = modloop.app.test_client()
@@ -35,6 +35,18 @@ class Tests(saliweb.test.TestCase):
                 r = re.compile(
                         b'Job.*testjob.*has completed.*output\\.pdb.*'
                         b'Download output PDB', re.MULTILINE | re.DOTALL)
+                self.assertRegex(rv.data, r)
+
+    def test_ok_job_mmcif(self):
+        """Test display of OK job, mmCIF output"""
+        with saliweb.test.make_frontend_job('testjob4') as j:
+            j.make_file("output.cif")
+            c = modloop.app.test_client()
+            for endpoint in ('job', 'results.cgi'):
+                rv = c.get('/%s/testjob4?passwd=%s' % (endpoint, j.passwd))
+                r = re.compile(
+                        b'Job.*testjob.*has completed.*output\\.cif.*'
+                        b'Download output mmCIF', re.MULTILINE | re.DOTALL)
                 self.assertRegex(rv.data, r)
 
     def test_failed_job(self):
