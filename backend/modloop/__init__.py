@@ -217,7 +217,7 @@ class Job(saliweb.backend.Job):
     def run(self):
         with open('loops.tsv') as fh:
             loops = fh.read().rstrip('\r\n')
-        if not re.match('[A-Za-z0-9\t _-<>]+$', loops):
+        if not re.match('[A-Za-z0-9\t _<>-]+$', loops):
             raise saliweb.backend.SanityError("Invalid character in loops.tsv")
         loops = loops.split('\t')
         if len(loops) % 4 != 0:
