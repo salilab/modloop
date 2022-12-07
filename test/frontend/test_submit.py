@@ -79,6 +79,12 @@ class Tests(saliweb.test.TestCase):
         self.assertEqual(end_res, [5, 30])
         self.assertEqual(end_id, [' ', 'A'])
 
+        # Negative residue numbers are OK
+        (loops, start_res, start_id, end_res, end_id,
+         loop_data) = modloop.submit.parse_loop_selection('-5:A:1:A:')
+        self.assertEqual(start_res, [-5])
+        self.assertEqual(end_res, [1])
+
         # Wrong number of colons
         self.assertRaises(
             saliweb.frontend.InputValidationError,

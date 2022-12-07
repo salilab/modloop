@@ -86,13 +86,13 @@ def parse_loop_selection(loops):
     end_id = []
     loops = 0
     while loops*4+3 < len(loop_data) and loop_data[loops*4] != "":
-        if (not loop_data[loops*4].isdigit()
-                or not loop_data[loops*4+2].isdigit()):
+        try:
+            start_res.append(int(loop_data[loops*4]))
+            end_res.append(int(loop_data[loops*4+2]))
+        except ValueError:
             raise saliweb.frontend.InputValidationError(
                 "Residue indices are not numeric")
-        start_res.append(int(loop_data[loops*4]))
         start_id.append(loop_data[loops*4+1])
-        end_res.append(int(loop_data[loops*4+2]))
         end_id.append(loop_data[loops*4+3])
         # all the selected residues
         total_res += (end_res[-1] - start_res[-1] + 1)
