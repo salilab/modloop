@@ -204,7 +204,8 @@ rm -rf $tmpdir
 """ % locals()
     r = runnercls(script)
     r.set_sge_options("-o output.error -j y -l h_rt=24:00:00 -l scratch=1G "
-                      "-r y -N loop -p -4 -t 1-%d" % number_of_tasks)
+                      "-r y -p -4 -t 1-%d" % number_of_tasks)
+    r.set_sge_name(jobname)
     return r
 
 
