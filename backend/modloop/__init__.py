@@ -136,7 +136,7 @@ def make_python_script(loops, model, sequence):
     model_format = model.file_format
     return """
 # Run this script with something like
-#    python loop.py N > N.log
+#    python3 loop.py N > N.log
 # where N is an integer from 1 to the number of models.
 #
 # ModLoop does this for N from 1 to 300 (it runs the tasks in parallel on a
@@ -189,7 +189,7 @@ cp %(directory)s/$input %(directory)s/%(input_pdb)s .
 
 module load Sali
 module load modeller/10.4
-python $input ${SGE_TASK_ID} >& $output
+python3 $input ${SGE_TASK_ID} >& $output
 
 # Copy back PDB/mmCIF
 cp *.B* %(directory)s
