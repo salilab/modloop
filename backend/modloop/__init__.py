@@ -188,7 +188,7 @@ mkdir -p $tmpdir && cd $tmpdir || exit 1
 cp %(directory)s/$input %(directory)s/%(input_pdb)s .
 
 module load Sali
-module load modeller/10.4
+module load modeller/10.5
 python3 $input ${SGE_TASK_ID} >& $output
 
 # Copy back PDB/mmCIF
