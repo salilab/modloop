@@ -3,7 +3,6 @@ import modloop
 import saliweb.test
 import saliweb.backend
 import py_compile
-import sys
 import os
 import re
 
@@ -29,8 +28,6 @@ class PreProcessTests(saliweb.test.TestCase):
             with open('test.py', 'w') as fh:
                 fh.write(s)
             py_compile.compile('test.py', doraise=True)
-            if sys.version_info[0] == 2:
-                os.unlink('test.pyc')
             os.unlink('test.py')
 
     def test_make_python_script_mmcif(self):
@@ -51,8 +48,6 @@ class PreProcessTests(saliweb.test.TestCase):
             with open('test.py', 'w') as fh:
                 fh.write(s)
             py_compile.compile('test.py', doraise=True)
-            if sys.version_info[0] == 2:
-                os.unlink('test.pyc')
             os.unlink('test.py')
 
     def test_make_sge_script_pdb(self):
