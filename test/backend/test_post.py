@@ -40,11 +40,17 @@ class PostProcessTests(saliweb.test.TestCase):
                     "REMARK   1 MODELLER OBJECTIVE FUNCTION:      -457.3816\n")
             with open('empty.pdb', 'w') as fh:
                 pass
+            with open('bad-score.pdb', 'w') as fh:
+                fh.write(
+                    "REMARK   1 MODELLER OBJECTIVE FUNCTION:***************\n")
             model = modloop.PdbModel()
             self.assertEqual(model.get_best([]), None)
             self.assertEqual(model.get_best(['empty.pdb']), None)
             self.assertEqual(model.get_best(['test1.pdb']),
                              'test1.pdb')
+            self.assertEqual(model.get_best(['test1.pdb', 'bad-score.pdb']),
+                             'test1.pdb')
+            self.assertEqual(model.get_best(['bad-score.pdb']), None)
             self.assertEqual(
                 model.get_best(['test1.pdb', 'test2.pdb']),
                 'test2.pdb')

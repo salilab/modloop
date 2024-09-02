@@ -29,10 +29,15 @@ class _Model(object):
                 for line in f:
                     m = self.objfunc_re.search(line)
                     if m:
-                        score = float(m.group(1))
-                        if best_pdb is None or score < best_score:
-                            best_pdb = pdb
-                            best_score = score
+                        try:
+                            score = float(m.group(1))
+                        except ValueError:
+                            # Score might be '*********', out of range
+                            score = None
+                        if score is not None:
+                            if best_pdb is None or score < best_score:
+                                best_pdb = pdb
+                                best_score = score
                         break
         return best_pdb
 
