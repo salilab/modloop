@@ -18,7 +18,7 @@ class IncompleteJobError(Exception):
     pass
 
 
-class _Model(object):
+class _Model:
     def get_outputs(self):
         return glob.glob("loop*.BL*.%s" % self.extension)
 
