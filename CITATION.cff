@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Fiser"
+  given-names: "András"
+- family-names: "Sali"
+  given-names: "Andrej"
+title: "ModLoop"
+url: "https://github.com/salilab/modloop"
+preferred-citation:
+  type: article
+  authors:
+  - family-names: "Fiser"
+    given-names: "András"
+  - family-names: "Sali"
+    given-names: "Andrej"
+  doi: "10.1093/bioinformatics/btg362"
+  journal: "Bioinformatics"
+  month: 12
+  start: 2500
+  end: 2501
+  title: "ModLoop: automated modeling of loops in protein structures"
+  volume: 19
+  issue: 18
+  year: 2003
