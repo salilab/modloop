@@ -65,7 +65,7 @@ for references please cite these two articles:
    Bioinformatics. (2003) 18(19) 2500-01
 
 
-For further inquiries, please contact: modloop@salilab.org
+For further inquiries, please contact: modloop@ucsf.edu
 
 with best regards,
 Andras Fiser
