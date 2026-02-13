@@ -132,9 +132,9 @@ class Tests(saliweb.test.TestCase):
             # Non-ASCII chain ID
             with open(pdb, 'w') as fh:
                 fh.write("ATOM      1  CA  ALA A   1    "
-                        "18.511  -1.416  15.632  1.00  6.84           C\n")
+                         "18.511  -1.416  15.632  1.00  6.84           C\n")
                 fh.write("ATOM      1  CA  ALA \x80   1    "
-                        "18.511  -1.416  15.632  1.00  6.84           C\n")
+                         "18.511  -1.416  15.632  1.00  6.84           C\n")
             with open(pdb, 'rb') as fh:
                 fs = FileStorage(stream=fh, filename='test.pdb')
                 self.assertRaises(
