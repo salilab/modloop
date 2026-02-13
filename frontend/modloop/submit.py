@@ -148,7 +148,7 @@ class PdbFileChecker(FileChecker):
                     res = res.decode('ascii')
                 except UnicodeDecodeError:
                     raise saliweb.frontend.InputValidationError(
-                        "Non-ASCII chain or residue name in input PDB, "
+                        "Non-ASCII chain ID or residue number in input PDB, "
                         "line %d" % (i + 1))
                 residues.discard(make_residue_id(chain, res))
         return file_contents
