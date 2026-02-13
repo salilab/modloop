@@ -139,12 +139,17 @@ class PdbFileChecker(FileChecker):
 
         file_contents = self.fh.readlines()
         atom_re = re.compile(b'ATOM.................(.)(....)')
-        for line in file_contents:
+        for i, line in enumerate(file_contents):
             m = atom_re.match(line)
             if m:
                 chain, res = m.group(1), m.group(2)
-                chain = chain.decode('ascii')
-                res = res.decode('ascii')
+                try:
+                    chain = chain.decode('ascii')
+                    res = res.decode('ascii')
+                except UnicodeDecodeError:
+                    raise saliweb.frontend.InputValidationError(
+                        "Non-ASCII chain or residue name in input PDB, "
+                        "line %d" % i)
                 residues.discard(make_residue_id(chain, res))
         return file_contents
 

@@ -129,6 +129,19 @@ class Tests(saliweb.test.TestCase):
         """Test read_pdb_file() in PDB format"""
         with tempfile.TemporaryDirectory() as tmpdir:
             pdb = os.path.join(tmpdir, 'test.pdb')
+            # Non-ASCII chain ID
+            with open(pdb, 'w') as fh:
+                fh.write("ATOM      1  CA  ALA A   1    "
+                        "18.511  -1.416  15.632  1.00  6.84           C\n")
+                fh.write("ATOM      1  CA  ALA \x80   1    "
+                        "18.511  -1.416  15.632  1.00  6.84           C\n")
+            with open(pdb, 'rb') as fh:
+                fs = FileStorage(stream=fh, filename='test.pdb')
+                self.assertRaises(
+                    saliweb.frontend.InputValidationError,
+                    modloop.submit.read_pdb_file,
+                    fs, 2, [1, 1], ['A', 'A'], [1, 1], ['A', 'A'])
+
             with open(pdb, 'w') as fh:
                 for chain in (' ', 'A'):
                     for resid in range(1, 11):
